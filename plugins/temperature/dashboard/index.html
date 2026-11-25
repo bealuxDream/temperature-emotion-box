@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>温度表情箱 · 温度也有表情</title><link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/settings.css"></head>
+<body>
+<div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+<header><a class="brand" href="/"><span class="brand-icon">◡</span> 温度表情箱 <span class="edition">01 / FEEL THE ROOM</span></a><a class="chat-link" href="/chat" target="_blank" rel="noreferrer">打开 DeepSeek 聊天 ↗</a></header>
+<main>
+  <div class="eyebrow"><span class="dot"></span> A LITTLE COMPANY, IN EVERY DEGREE</div>
+  <section class="intro"><h1>感知此刻的温度，<br>多一点<span>恰好的关心。</span></h1><p>让房间的冷暖，成为对话的一部分。</p></section>
+  <section id="comfort-setup" class="card comfort-setup" aria-labelledby="comfort-setup-title" hidden>
+    <div class="comfort-setup-copy">
+      <h2 id="comfort-setup-title">首次设置 · 你喜欢多少度？</h2>
+      <p>填一个理想温度，或再填一个上限组成区间。欧鲸鲸会以此判断冷暖。</p>
+    </div>
+    <form id="comfort-setup-form">
+      <div class="comfort-setup-fields">
+        <label class="field">理想温度或区间下限（°C）<input id="setup-first" type="number" min="-20" max="59" step="any" placeholder="例如 23" required></label>
+        <label class="field">区间上限（可选，°C）<input id="setup-last" type="number" min="-19" max="60" step="any" placeholder="例如 26"></label>
+      </div>
+      <div class="comfort-setup-actions">
+        <button id="setup-skip" type="button" class="skip-button">稍后设置</button>
+        <button class="save-button" type="submit">记住我的舒适温度</button>
+      </div>
+      <p id="setup-message" role="status" aria-live="polite"></p>
+    </form>
+  </section>
+  <section class="grid">
+    <article class="card companion"><div class="card-top"><span>你的温度伙伴</span><span id="status" class="badge">正在连接</span></div><div id="face" class="face waiting" aria-label="等待设备"><div class="eye left"></div><div class="eye right"></div><div class="mouth"></div><div class="blush left"></div><div class="blush right"></div></div><div id="feeling" class="feeling">等一份来自房间的消息</div><p id="care" class="care">连接温度探头后，我就能感受这里的冷暖。</p><div class="companion-footer"><span>ESP32-S3 × DS18B20</span><span id="connection">等待设备上线</span></div></article>
+    <div class="right-column"><article class="card reading"><div class="card-top"><span>此刻 · 探头温度</span><span id="live" class="live">NO DATA</span></div><div class="temperature"><span id="temperature">--</span><span class="unit">°C</span></div><p class="reading-note" id="note">尚未收到真实测量数据</p><div class="reading-meta"><div><span>设备</span><strong id="device">box-01</strong></div><div><span>最近采样</span><strong id="sample">--:--:--</strong></div></div></article><article class="card trend"><div class="card-top"><span>温度的足迹</span><span class="muted">最近 300 次采样</span></div><canvas id="chart" role="img" aria-label="最近的温度趋势"></canvas><div id="chart-empty" class="chart-empty">真实数据抵达后，曲线会从这里开始。</div></article></div>
+  </section>
+  <section class="mood-guide" aria-labelledby="mood-title">
+    <div class="mood-heading"><div><h2 id="mood-title">同一句问候，可以有不同的温度。</h2><p>回复长短与情绪始终随温度变化；日常对话中每轮有 17% 的机会，才会顺带提一句温度体感。</p></div><a href="#settings-title">设定我的舒适区 ↓</a></div>
+    <div class="mood-grid">
+      <article class="mood-card mood-cool"><h3>低于舒适区</h3><p>越凉，回复越简短。日常聊天每轮有 17% 的机会顺带提一句冷暖。</p></article>
+      <article class="mood-card mood-comfy"><h3>在舒适区</h3><p>在舒适区里，回复长度和积极程度也会随温度细微变化。你可以直接告诉 AI 你喜欢的室温。</p></article>
+      <article class="mood-card mood-hot"><h3>高于舒适区</h3><p>越热，回复越积极，超过舒适区时语气更着急。</p></article>
+    </div>
+  </section>
+  <section class="card settings-panel" aria-labelledby="settings-title">
+    <div class="settings-heading"><div><h2 id="settings-title">温度与聊天设置</h2><p>在这里修改提示词，或在聊天里告诉 AI 你喜欢的室温。</p></div><span id="settings-state" class="settings-state">正在读取偏好…</span></div>
+    <form id="settings-form">
+      <div class="settings-grid">
+        <label class="field prompt-field">有温度时写入系统提示词<span class="field-help">可用 {{temperature}} 插入实测温度，{{unit}} 插入单位。</span><textarea id="prompt-template" maxlength="1200" rows="3" required></textarea></label>
+        <label class="field prompt-field">暂时没有有效温度时<span class="field-help">不使用旧读数，也不猜测。</span><input id="unavailable-prompt" maxlength="400" required></label>
+        <label class="field">AI 对自己的称呼<input id="assistant-name" maxlength="32" required></label>
+        <fieldset class="field comfort-field"><legend>舒适温度范围</legend><div class="range-fields"><label>从 <input id="comfort-min" type="number" min="-20" max="59" step="any" required> °C</label><label>到 <input id="comfort-max" type="number" min="-19" max="60" step="any" required> °C</label></div><span id="comfort-status" class="field-help">这是通用起始范围。也可以在聊天里告诉 AI 你喜欢的室温。</span></fieldset>
+        <label class="field">传感器串口<select id="serial-port"><option value="auto">自动识别</option><option value="">仅使用 HTTP 上报</option></select><span class="field-help">连接 USB-UART 后选择对应的串口。</span></label>
+        <label class="toggle-field"><input id="auto-open" type="checkbox"><span><strong>首次启动自动打开温度面板</strong><small>只在第一次启动时打开一次。</small></span></label>
+      </div>
+      <details class="mood-settings">
+        <summary>编辑冷热情绪提示词</summary>
+        <p>填写后覆盖该温度区间的默认情绪设置。清空并保存即可恢复默认。</p>
+        <div class="settings-grid">
+          <label class="field">低于舒适区<textarea id="cold-mood-prompt" maxlength="600" rows="2" placeholder="越冷越简短，偶尔说“好冷啊，欧鲸鲸要感冒了”。"></textarea></label>
+          <label class="field">在舒适区<textarea id="comfort-mood-prompt" maxlength="600" rows="2" placeholder="保持可爱，随着温度升高变得更活泼。"></textarea></label>
+          <label class="field">高于舒适区<textarea id="hot-mood-prompt" maxlength="600" rows="2" placeholder="越热越着急，偶尔说“好热好热，感觉要被煮熟了”。"></textarea></label>
+        </div>
+      </details>
+      <div class="settings-actions"><span id="settings-message" role="status" aria-live="polite"></span><button class="save-button" type="submit" disabled>保存温度偏好</button></div>
+    </form>
+  </section>
+  <footer><span>温度有数，关心有度。</span><span>探头温度 ≠ 体温 · 过期数据不会作为实时温度使用 · 轻松安装的 DeepSeek Harness 插件</span></footer>
+</main><script type="module" src="/app.js"></script>
+</body></html>

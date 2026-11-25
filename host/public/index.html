@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>温度表情箱 · 温度也有表情</title><link rel="stylesheet" href="/style.css"></head>
+<body>
+<div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+<header><a class="brand" href="/"><span class="brand-icon">◡</span> 温度表情箱 <span class="edition">01 / FEEL THE ROOM</span></a><a class="chat-link" href="/chat" target="_blank" rel="noreferrer">打开 DeepSeek 聊天 ↗</a></header>
+<main>
+  <div class="eyebrow"><span class="dot"></span> A LITTLE COMPANY, IN EVERY DEGREE</div>
+  <section class="intro"><h1>感知此刻的温度，<br>多一点<span>恰好的关心。</span></h1><p>让房间的冷暖，成为对话的一部分。</p></section>
+  <section class="grid">
+    <article class="card companion"><div class="card-top"><span>你的温度伙伴</span><span id="status" class="badge">正在连接</span></div><div id="face" class="face waiting" aria-label="等待设备"><div class="eye left"></div><div class="eye right"></div><div class="mouth"></div><div class="blush left"></div><div class="blush right"></div></div><div id="feeling" class="feeling">等一份来自房间的消息</div><p id="care" class="care">连接温度探头后，我就能感受这里的冷暖。</p><div class="companion-footer"><span>ESP32-S3 × DS18B20</span><span id="connection">等待设备上线</span></div></article>
+    <div class="right-column"><article class="card reading"><div class="card-top"><span>此刻 · 探头温度</span><span id="live" class="live">NO DATA</span></div><div class="temperature"><span id="temperature">--</span><span class="unit">°C</span></div><p class="reading-note" id="note">尚未收到真实测量数据</p><div class="reading-meta"><div><span>设备</span><strong id="device">box-01</strong></div><div><span>最近采样</span><strong id="sample">--:--:--</strong></div></div></article><article class="card trend"><div class="card-top"><span>温度的足迹</span><span class="muted">最近 300 次采样</span></div><canvas id="chart" role="img" aria-label="最近的温度趋势"></canvas><div id="chart-empty" class="chart-empty">真实数据抵达后，曲线会从这里开始。</div></article></div>
+  </section>
+  <section class="how"><div><span class="step">01</span><h2>感知冷暖</h2><p>DS18B20 实时采集周围温度。</p></div><div><span class="step">02</span><h2>带入对话</h2><p>每轮聊天前，刷新 AI 的温度感知。</p></div><div><span class="step">03</span><h2>自然关心</h2><p>一句适时的提醒，一点恰好的陪伴。</p></div></section>
+  <footer><span>温度有数，关心有度。</span><span>探头温度 ≠ 体温 · 过期数据不会作为实时温度使用</span></footer>
+</main><script type="module" src="/app.js"></script>
+</body></html>

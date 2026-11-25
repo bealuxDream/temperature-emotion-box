@@ -1,0 +1,61 @@
+{
+  "name": "dsh-temperature-emotion-box",
+  "version": "0.3.0",
+  "description": "Cute real-time ambient temperature companion and dashboard for DeepSeek Harness",
+  "license": "MIT",
+  "type": "module",
+  "main": "./index.mjs",
+  "exports": {
+    ".": "./index.mjs",
+    "./runtime": "./runtime-plugin.mjs",
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json"
+  },
+  "files": [
+    "index.mjs",
+    "runtime-plugin.mjs",
+    "runtime.mjs",
+    "temperature.mjs",
+    "serial.mjs",
+    "settings.mjs",
+    "dashboard/**",
+    "locale/*.json",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20.0.0",
+    "dsh": "0.2.2-rc.1"
+  },
+  "dependencies": {
+    "@serialport/parser-readline": "13.0.0",
+    "serialport": "13.0.0"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "~4.1.0",
+    "@deepseek-ai/dsh-tools": "0.2.2-rc.1",
+    "@deepseek-ai/schemastery": "~3.19.0"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "4.1.0",
+    "@deepseek-ai/dsh-tools": "0.2.2-rc.1",
+    "@deepseek-ai/dsh-system-prompt": "0.2.2-rc.1",
+    "@deepseek-ai/schemastery": "3.19.0"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml",
+      "listedByDefault": true
+    }
+  },
+  "repository": {
+    "url": "https://github.com/kiroee3/temperature-emotion-box.git",
+    "type": "git",
+    "directory": "plugins/temperature"
+  },
+  "homepage": "https://kiroee3.github.io/temperature-emotion-box/",
+  "bugs": {
+    "url": "https://github.com/kiroee3/temperature-emotion-box/issues"
+  }
+}

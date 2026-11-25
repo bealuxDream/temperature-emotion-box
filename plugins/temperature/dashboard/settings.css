@@ -1,0 +1,38 @@
+.settings-panel{padding:30px 34px;margin:4px 0 38px;background:linear-gradient(145deg,#fff,#fafbf7)}
+.comfort-setup{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;padding:22px 29px;margin:0 0 21px;background:#f9fbf4}
+.comfort-setup[hidden]{display:none}
+.comfort-setup h2{font-size:18px;font-weight:600;margin:0 0 9px}
+.comfort-setup-copy p{font-size:13px;line-height:1.7;color:#52645a;margin:0}
+.comfort-setup-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.comfort-setup-actions{display:flex;justify-content:flex-end;align-items:center;gap:15px;margin-top:13px}
+.skip-button{background:none;border:0;padding:8px 3px;color:#486346;font:inherit;font-size:12px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+#setup-message{margin:6px 0 0;color:#794633;font-size:12px}
+#setup-message:empty{display:none}
+@media(max-width:760px){.comfort-setup{grid-template-columns:1fr;gap:15px;padding:20px}}
+.mood-guide{margin:32px 0 27px}
+.mood-heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 14px}
+.mood-heading h2{margin:0;font-size:17px;font-weight:600}.mood-heading p{margin:7px 0 0;color:#62746a;font-size:12px;line-height:1.7}
+.mood-heading a{color:#486346;font-size:12px;text-decoration:underline;text-underline-offset:4px;white-space:nowrap}
+.mood-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.mood-card{padding:17px 20px;border-radius:17px;border:1px solid #e1e8dd;background:#f2f4eb}
+.mood-cool{background:#edf3f5;border-color:#e1eaec}
+.mood-hot{background:#fbf1e8;border-color:#f0e6db}
+.mood-card h3{font-size:13px;font-weight:600;margin:0 0 8px}
+.mood-card p{font-size:12px;line-height:1.7;color:#51665c;margin:0}
+.mood-settings{border-top:1px solid #edf0e9;padding:16px 0;margin-bottom:4px;color:#52645a;font-size:12px}
+.mood-settings summary{cursor:pointer;font-weight:600}.mood-settings>p{margin:10px 0 0;color:#62746a}
+.mood-settings .settings-grid{padding-bottom:0}
+@media(max-width:620px){.mood-heading{align-items:flex-start;flex-direction:column}.mood-grid{grid-template-columns:1fr}}
+.settings-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:22px;padding-bottom:23px;border-bottom:1px solid #edf0e9}
+.settings-heading .eyebrow{font-size:9px;letter-spacing:1.8px}.settings-heading h2{font-size:21px;font-weight:550;margin:10px 0 6px}.settings-heading p{font-size:12px;color:#8d9a91;margin:0}
+.settings-state{font-size:11px;color:#718662;background:#f1f4eb;border-radius:20px;padding:7px 12px;white-space:nowrap}
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:21px 25px;padding:24px 0}
+.field{display:flex;flex-direction:column;gap:8px;border:0;padding:0;margin:0;min-width:0;color:#52645a;font-family:inherit;font-size:12px}
+.field input,.field select,.field textarea{width:100%;padding:11px 12px;border:1px solid #e1e7dd;border-radius:11px;background:#fbfcfa;color:#33493e;font:inherit;outline:none;transition:border-color .2s,box-shadow .2s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#8ca47a;box-shadow:0 0 0 3px #91a57520}.field textarea{resize:vertical;line-height:1.8;min-height:72px}
+.field-help{font-size:10px;line-height:1.65;color:#9aa69b}.comfort-field legend{padding:0;margin-bottom:8px;color:#52645a;font-size:12px}
+.range-fields{display:flex;align-items:center;gap:12px}.range-fields label{display:flex;align-items:center;gap:8px;flex:1;font-size:11px}.range-fields input{min-width:50px}
+.toggle-field{display:flex;align-items:center;gap:12px;cursor:pointer;color:#52645a}.toggle-field>input{width:17px;height:17px;accent-color:#476b55}.toggle-field span{display:flex;flex-direction:column;gap:5px}.toggle-field strong{font-size:12px;font-weight:550}.toggle-field small{font-size:10px;color:#9aa69b}
+.settings-actions{display:flex;align-items:center;justify-content:space-between;gap:15px;border-top:1px solid #edf0e9;padding-top:18px}.settings-actions [role=status]{font-size:11px;color:#81906f;min-height:1em}
+.save-button{border:0;background:#294c40;color:#fff;border-radius:24px;padding:11px 19px;font:inherit;font-size:12px;cursor:pointer;transition:background .2s}.save-button:hover{background:#3d6555}.save-button:disabled{opacity:.65;cursor:wait}
+@media(max-width:760px){.settings-panel{padding:22px 20px}.settings-heading{flex-direction:column}.settings-grid{grid-template-columns:1fr;gap:18px}.settings-actions{align-items:flex-start;flex-direction:column}.save-button{align-self:flex-end}}

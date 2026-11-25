@@ -1,0 +1,12 @@
+node_modules/
+.local/
+.env
+.env.*
+!.env.example
+firmware/.pio/
+firmware/include/secrets.h
+__pycache__/
+*.log
+.playwright-cli/
+output/playwright/
+.DS_Store

@@ -1,0 +1,5 @@
+- insert:
+    - id: temperature-emotion-box-runtime
+      name: dsh-temperature-emotion-box/runtime
+    - id: temperature-emotion-box
+      name: dsh-temperature-emotion-box
