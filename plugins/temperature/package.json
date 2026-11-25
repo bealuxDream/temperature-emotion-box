@@ -50,12 +50,12 @@
     }
   },
   "repository": {
-    "url": "https://github.com/kiroee3/temperature-emotion-box.git",
+    "url": "https://github.com/bealuxDream/temperature-emotion-box.git",
     "type": "git",
     "directory": "plugins/temperature"
   },
-  "homepage": "https://kiroee3.github.io/temperature-emotion-box/",
+  "homepage": "https://bealuxdream.github.io/temperature-emotion-box/",
   "bugs": {
-    "url": "https://github.com/kiroee3/temperature-emotion-box/issues"
+    "url": "https://github.com/bealuxDream/temperature-emotion-box/issues"
   }
 }

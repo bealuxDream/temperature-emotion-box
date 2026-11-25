@@ -35,7 +35,7 @@
 - 测试拔插探头、断开串口、恢复、设备断电重启和 stale 状态复位。
 - 当前模型 API 和工具调用都已通过真实请求验证；API 由本机 dsh 配置调用，未写入项目或设备。
 - 用独立参考温度计做多点对比与最终标定；当前不能宣称实测准确度或整机验收通过。
-- 仓库：https://github.com/kiroee3/temperature-emotion-box；宣传页：https://kiroee3.github.io/temperature-emotion-box/。
+- 仓库：https://github.com/bealuxDream/temperature-emotion-box；宣传页：https://bealuxdream.github.io/temperature-emotion-box/。
 
 ## 继续入口
 
@@ -47,3 +47,10 @@
 - 独立静态宣传页位于 site/；浏览器验证桌面和 390px 手机布局，以及 10°C / 38°C 两端的示例互动。页面明确标注示例数据，不读取本机设备或 API Key。
 - 本次插件软件测试 12/12 通过，安装包包含 16 个文件；已发布 GitHub Release v0.3.0 及 SHA256SUMS，公开下载包与本地文件校验一致。未执行新固件烧录或重新标定。
 - GitHub Pages 工作流 45552332431 成功，线上浏览器已确认宣传页可访问。首次部署的产物可见性问题通过升级官方 Action 并拆分上传、部署任务解决。main 已推送并跟踪 origin/main。
+
+## 组织迁移 · 2026-11-25
+
+- 仓库已从 kiroee3 转移至 bealuxDream，仍为 Public / MIT；提交历史和 v0.3.0 Release 资产已保留，SHA-256 未变化。
+- 本机 origin、README、宣传页入口和插件仓库元数据已改为组织地址。
+- 组织域名宣传页为 https://bealuxdream.github.io/temperature-emotion-box/，部署结果需在此次推送后复核。
+- 当前 kiroee3 在组织仓库拥有 WRITE 权限；组织仓库设置由组织管理员管理。

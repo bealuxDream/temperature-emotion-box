@@ -1,6 +1,6 @@
 # 温度表情箱 / Temperature Emotion Box
 
-[静态宣传页](https://kiroee3.github.io/temperature-emotion-box/) · [下载安装包](https://github.com/kiroee3/temperature-emotion-box/releases/latest) · [MIT License](LICENSE)
+[静态宣传页](https://bealuxdream.github.io/temperature-emotion-box/) · [下载安装包](https://github.com/bealuxDream/temperature-emotion-box/releases/latest) · [MIT License](LICENSE)
 
 ESP32-S3 + DS18B20 实时测温，以 **DeepSeek 官方 Harness（dsh）** 作为带界面的 AI 上位机。插件既提供温度查询工具，也在每轮模型请求前注入最新环境温度，让对话有温度依据。本次探头接 GPIO16，通过 USB 串口进入上位机。
 
@@ -15,7 +15,7 @@ ESP32-S3 + DS18B20 实时测温，以 **DeepSeek 官方 Harness（dsh）** 作�
 
 ## 安装与使用
 
-先到 [GitHub Releases](https://github.com/kiroee3/temperature-emotion-box/releases/latest) 下载插件安装包。如果已有 DeepSeek Harness Web 0.2.2-rc.1，把 `dsh-temperature-emotion-box-0.3.0.tgz` 安装到 `web` profile。安装后启动 dsh，打开 [温度表情箱](http://127.0.0.1:8787/)。
+先到 [GitHub Releases](https://github.com/bealuxDream/temperature-emotion-box/releases/latest) 下载插件安装包。如果已有 DeepSeek Harness Web 0.2.2-rc.1，把 `dsh-temperature-emotion-box-0.3.0.tgz` 安装到 `web` profile。安装后启动 dsh，打开 [温度表情箱](http://127.0.0.1:8787/)。
 
 ```powershell
 dsh plugin --profile web add "C:\path\to\dsh-temperature-emotion-box-0.3.0.tgz"
@@ -81,7 +81,7 @@ git status
 
 ## 开源与宣传页
 
-项目以 MIT 协议开源：[GitHub 仓库](https://github.com/kiroee3/temperature-emotion-box)。依赖、密钥、Wi-Fi 配置、dsh 会话数据与编译产物均已忽略。
+项目以 MIT 协议开源：[GitHub 仓库](https://github.com/bealuxDream/temperature-emotion-box)。依赖、密钥、Wi-Fi 配置、dsh 会话数据与编译产物均已忽略。
 
 静态宣传页源文件在 site/，通过 GitHub Pages 发布；main 分支更新页面文件时，GitHub Actions 自动部署。宣传页的滑块仅为明确标注的交互示例，不显示实测读数。真实传感器状态、温度曲线和设置保存在插件附带的本机面板中。
 
