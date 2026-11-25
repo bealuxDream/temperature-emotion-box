@@ -52,5 +52,5 @@
 
 - 仓库已从 kiroee3 转移至 bealuxDream，仍为 Public / MIT；提交历史和 v0.3.0 Release 资产已保留，SHA-256 未变化。
 - 本机 origin、README、宣传页入口和插件仓库元数据已改为组织地址。
-- 组织域名宣传页为 https://bealuxdream.github.io/temperature-emotion-box/，部署结果需在此次推送后复核。
+- 组织域名宣传页为 https://bealuxdream.github.io/temperature-emotion-box/，GitHub Pages 工作流 45555969992 已成功；新域名 HTTP 200，组织下载链接核验通过。
 - 当前 kiroee3 在组织仓库拥有 WRITE 权限；组织仓库设置由组织管理员管理。
