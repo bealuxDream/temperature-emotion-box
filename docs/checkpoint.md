@@ -116,3 +116,15 @@ c6961e4121e5c5ee33b026d94f845f9945b7c80bdabb25a9490de657058b2b39  temperature-em
 - 升级后仍显示个人测试偏好 23–26°C；COM3 FTDI 自动接入真实 DS18B20 帧，页面当时显示约 22.7°C，未做参考温度计校准。向导测试未修改用户正式数据或重写硬件固件。
 - 实现提交 `39e03af433c083a5e9f7789a7fc8f3d804ccabeb` 已推送并发布 v0.4.2；Windows CI [45783736902](https://github.com/bealuxDream/temperature-emotion-box/actions/runs/45783736902) 与 Pages [45783736817](https://github.com/bealuxDream/temperature-emotion-box/actions/runs/45783736817) 均成功，线上 HTML 已指向新 ZIP。
 - 通过 `gh release download` 重新下载公开 Windows ZIP、标准插件和 SHA256SUMS，哈希比对一致。ZIP SHA-256 为 `38cf858decdfa30eb106fea38ad60152796e90d8c6de0ba4b921069a20d5c5e6`；tgz 为 `f4c0786636bae9a017ed021a6a67825dba018dfa664d7f2e3f4ea7122f330a55`。本轮隔离服务已停止。
+
+## 组件复用与定向卸载 v0.4.3 · 2026-11-26
+
+- Windows 启动器先探测项目私有目录、已记录路径和 PATH 中可发现的现有组件，实际运行版本探针：Node x64 ≥24.9、pnpm 10.25 以上的 10.x、dsh 0.2.2-rc.1。兼容即复用，只下载缺少项，不升级或覆盖全局程序。已下载且哈希正确的 Node ZIP 也可直接解压。
+- `execution-tools.json` 记录组件版本/路径/managed 或 reused 来源，runner 启动被选择的 dsh；私有 pnpm CMD shim 通过 Unicode 环境变量传递路径，修复 Windows PowerShell 5.1 / CMD 中文路径问题。项目仍使用独立 DSH_HOME，复用程序不自动读取其他 dsh 的密钥或聊天。
+- 插件按实际安装版本检查；仅升级启动器、标准插件仍是 0.4.2 时跳过插件重装。缺少运行时或模块才补装，仍使用国内镜像。
+- 新增解压包 `Uninstall.cmd`、安装窗口「卸载本项目组件」按钮，以及数据目录 `manager/Uninstall.cmd` 备用入口。只停止本项目拥有的进程，清理下载收据登记的 runtime/host/私有 cache/profile node_modules 及升级备份依赖。聊天、密钥、舒适偏好、工作区文件与日志保留；外部复用组件和全局缓存不删。原始 ZIP/解压包不扫描删除。
+- 删除前验证收据根目录、允许清理的相对路径和祖先 junction；包管理器内部链接只解除，不跟随到外部目标。陌生现有目录不自动认领。旧版以 installed-version/host ready/package 元数据及插件标记迁移下载目录，未识别到标记不删除。
+- 21 项 Node 测试通过；额外 PowerShell 临时夹具验证项目下载目录清理、外部 junction 目标保持、偏好保留、越界收据整批拒绝、重复卸载。Windows PowerShell 5.1 WPF 解析确认卸载按钮存在，未自动操作原生确认窗口。
+- 真实复用测试：全新 `.local/reuse-uninstall-*` 数据目录从 PATH 发现现有 Node 24.11.1、dsh 0.2.2-rc.1、pnpm 10.25.0；不创建私有 runtime/host，实际插件健康检查成功。重复启动复用进程；将镜像地址改为不可用并仅改变启动器版本，仍启动且插件明确跳过重装。卸载后外部三组件清单/程序哈希与偏好哈希不变。
+- 实际补装路径：`.local/managed-fallback-2c01c840fac1482f94ab653de30a41f4` 中只暴露全局 Node 24.7.0 与 pnpm，旧 Node 被跳过；从国内镜像下载 Node 24.11.1 和缺少的 dsh，已有 pnpm 复用，真实宿主启动通过。卸载后 runtime/host/cache/插件依赖全部消失，外部 Node 及个人偏好哈希不变。
+- 旧版卸载迁移在独立夹具验证通过：清除带旧启动器标记的私有 Node、host、当前及备份插件依赖，保留偏好。标准插件仍 v0.4.2、固件仍 v0.4.0；本轮未重新刷写固件或调用模型 API。

@@ -7,7 +7,7 @@ const sources=JSON.parse(await readFile('windows/download-sources.json','utf8'))
 const name='temperature-emotion-box-windows-v'+sources.version;
 const dir=resolve('.local/release',name);
 await mkdir(dir,{recursive:true});
-for(const file of ['Start.cmd','Stop.cmd','launcher.ps1','runner.mjs','download-sources.json'])await copyFile('windows/'+file,dir+'/'+file);
+for(const file of ['Start.cmd','Stop.cmd','Uninstall.cmd','launcher.ps1','runner.mjs','download-sources.json','find-node.ps1','discover-tools.mjs','managed-downloads.ps1'])await copyFile('windows/'+file,dir+'/'+file);
 // Windows PowerShell 5.1 requires a BOM to decode the Chinese GUI strings.
 const launcher=(await readFile(dir+'/launcher.ps1','utf8')).replace(/^\uFEFF/,'');
 await writeFile(dir+'/launcher.ps1','\uFEFF'+launcher);

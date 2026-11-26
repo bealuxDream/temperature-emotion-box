@@ -1,5 +1,5 @@
 import {spawn} from 'node:child_process';
-import {writeFile,appendFile} from 'node:fs/promises';
+import {writeFile,appendFile,readFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {createInterface} from 'node:readline';
 const root=process.env.TEMPERATURE_LAUNCH_ROOT;
@@ -8,7 +8,8 @@ const state={runnerPid:process.pid,startedAt:new Date().toISOString(),status:'st
 const stateFile=join(root,'run.json'),logFile=join(root,'service.log');
 let writes=Promise.resolve();
 function save(){const snapshot=JSON.stringify(state,null,2);writes=writes.then(()=>writeFile(stateFile,snapshot));}
-const child=spawn(process.execPath,[join(root,'host/node_modules/@deepseek-ai/dsh/lib/bin.js'),'web','--patch',join(root,'launcher.patch.yml'),'--port',process.env.TEMPERATURE_CHAT_PORT,'--no-open'],{cwd:join(root,'workspace'),env:{...process.env,DSH_HOME:join(root,'dsh')},windowsHide:true,stdio:['ignore','pipe','pipe']});
+const tools=JSON.parse(await readFile(join(root,'execution-tools.json'),'utf8'));
+const child=spawn(process.execPath,[tools.dsh.bin,'web','--patch',join(root,'launcher.patch.yml'),'--port',process.env.TEMPERATURE_CHAT_PORT,'--no-open'],{cwd:join(root,'workspace'),env:{...process.env,DSH_HOME:join(root,'dsh')},windowsHide:true,stdio:['ignore','pipe','pipe']});
 state.dshPid=child.pid;save();
 let tail='',announced=false,exited=false,checking=false;
 function capture(line){

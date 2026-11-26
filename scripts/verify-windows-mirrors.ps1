@@ -26,21 +26,23 @@ try{
   $health=Invoke-RestMethod ($state.dashboardUrl+'health')
   if($state.status -ne 'ready' -or $health.service -ne 'temperature-emotion-box'){throw 'Installed runtime is not ready.'}
   $zip=Join-Path $DataDirectory 'runtime/node-v24.11.1-win-x64.zip'
-  if((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash -ne $sources.nodeZipSha256){throw 'Mirrored Node digest differs.'}
-  $lock=Get-Content (Join-Path $DataDirectory 'host/package-lock.json') -Raw
+  $tools=Get-Content (Join-Path $DataDirectory 'execution-tools.json') -Encoding UTF8 -Raw|ConvertFrom-Json
+  if($tools.node.source -eq 'managed' -and (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash -ne $sources.nodeZipSha256){throw 'Mirrored Node digest differs.'}
+  $lockFile=Join-Path $DataDirectory 'host/package-lock.json'
+  $lock=if(Test-Path -LiteralPath $lockFile){Get-Content -LiteralPath $lockFile -Raw}else{''}
   $resolved=[regex]::Matches($lock,'"resolved"\s*:\s*"(https://[^"]+)"')
-  if($resolved.Count -eq 0){throw 'No resolved package evidence.'}
+  if($tools.dsh.source -eq 'managed' -and $resolved.Count -eq 0){throw 'No resolved package evidence.'}
   foreach($entry in $resolved){
     if(([Uri]$entry.Groups[1].Value).Host -notmatch '(^|\.)npmmirror\.com$'){throw 'Host dependency resolved outside the mirror.'}
   }
   $requests=@(Get-ChildItem -LiteralPath (Join-Path $DataDirectory 'logs') -File | ForEach-Object{Get-Content -LiteralPath $_.FullName -Raw}) -join ([char]10)
-  if($requests -notmatch 'https://registry.npmmirror.com'){throw 'No actual mirror HTTP requests in install logs.'}
+  if($tools.dsh.source -eq 'managed' -and $requests -notmatch 'https://registry.npmmirror.com'){throw 'No actual mirror HTTP requests in install logs.'}
   if($requests -match 'https://(?:registry\.npmjs\.org|nodejs\.org)'){throw 'Install log shows an official upstream request.'}
   # Verify the exact pnpm executable used by DSH sees the private mirror and empty store.
   $env:npm_config_userconfig=Join-Path $DataDirectory 'npmrc'
   $env:npm_config_registry=$sources.registry
-  $node=Join-Path $DataDirectory 'runtime/node-v24.11.1-win-x64/node.exe'
-  $pnpm=Join-Path $DataDirectory 'host/node_modules/pnpm/bin/pnpm.cjs'
+  $node=$tools.node.bin
+  $pnpm=$tools.pnpm.bin
   $registry=(& $node $pnpm config get registry | Out-String).Trim()
   if($registry.TrimEnd('/') -ne $sources.registry.TrimEnd('/')){throw 'Child pnpm did not inherit the mirror.'}
   $store=(& $node $pnpm store path | Out-String).Trim()
