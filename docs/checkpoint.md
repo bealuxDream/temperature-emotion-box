@@ -129,3 +129,6 @@ c6961e4121e5c5ee33b026d94f845f9945b7c80bdabb25a9490de657058b2b39  temperature-em
 - 实际补装路径：`.local/managed-fallback-2c01c840fac1482f94ab653de30a41f4` 中只暴露全局 Node 24.7.0 与 pnpm，旧 Node 被跳过；从国内镜像下载 Node 24.11.1 和缺少的 dsh，已有 pnpm 复用，真实宿主启动通过。卸载后 runtime/host/cache/插件依赖全部消失，外部 Node 及个人偏好哈希不变。
 - 旧版卸载迁移在独立夹具验证通过：清除带旧启动器标记的私有 Node、host、当前及备份插件依赖，保留偏好。标准插件仍 v0.4.2、固件仍 v0.4.0；本轮未重新刷写固件或调用模型 API。
 - v0.4.3 首次 Windows CI 暴露临时目录长短路径差异：组件路径已 realpath、数据根目录未 realpath，造成私有组件被误标 reused；删除范围仍由独立下载收据控制，不会因此删除外部组件。修正为双方真实路径比较并新增目录别名回归测试，本地 22/22 通过；Windows 修正版另发 v0.4.4，原 v0.4.3 资产不覆盖。
+- 修正版提交 `262fc9a11eb23a84cc94e1b4cc51822f56a787ff` 的 Windows CI [45809842449](https://github.com/bealuxDream/temperature-emotion-box/actions/runs/45809842449) 成功：22 项 Node 测试、资源完整性及 PowerShell 卸载链接/越界保护验证均通过。Pages [45809842289](https://github.com/bealuxDream/temperature-emotion-box/actions/runs/45809842289) 成功，线上 HTML 下载入口已为 v0.4.4。
+- v0.4.4 最终包重新执行真实组件复用、下载地址不可用的启动器升级和数据目录备用卸载入口验收通过；外部 Node/pnpm/dsh 及偏好哈希未变，服务已停止。Windows PowerShell 5.1 界面解析通过，未自动点击原生卸载确认窗口。
+- Release v0.4.4 已设为 latest，公开 ZIP 通过 GitHub CLI 重新下载并校验一致：SHA-256 `3fa0136461ea71172091871b2852716448d86340276e7fedc6808137be99f326`。标准插件保持 0.4.2，公开固件保持 0.4.0。
