@@ -7,7 +7,7 @@
   <meta name="description" content="基于 ESP32-S3、DS18B20 与 DeepSeek Harness 的开源温度伙伴。体验冷热如何改变聊天的表情与语气。">
   <title>温度表情箱 · 让关心刚刚好</title>
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css?v=room-tone">
+  <link rel="stylesheet" href="./style.css?v=wiring-guide">
   <script src="./app.js?v=room-tone" defer></script>
 </head>
 <body data-mood="comfy">
@@ -32,6 +32,7 @@
     <nav class="top-nav" aria-label="主导航">
       <a href="#moods">表情实验室</a>
       <a href="#how">它如何工作</a>
+      <a href="#wiring">接线图</a>
       <a href="#install">开始使用</a>
     </nav>
     <a class="button button-outline top-chat" href="https://github.com/bealuxDream/temperature-emotion-box">GitHub <svg aria-hidden="true"><use href="#i-up"/></svg></a>
@@ -139,6 +140,94 @@
       </div>
     </section>
 
+    <section class="wiring" id="wiring" aria-labelledby="wiring-heading">
+      <div class="section-head">
+        <div>
+          <div class="section-label"><svg aria-hidden="true"><use href="#i-chip"/></svg> 实拍接线图</div>
+          <h2 id="wiring-heading">先拔 USB，再接这 3 根线。</h2>
+          <p>用杜邦线把两张图中相同编号的针脚连起来。认板上的丝印，线色和针脚顺序可能随模块而变。</p>
+        </div>
+      </div>
+
+      <div class="wiring-photos">
+        <figure class="wiring-photo">
+          <div class="wiring-frame">
+            <img src="./assets/wiring/esp32-s3-headers.webp" width="1120" height="660" loading="lazy" decoding="async" alt="ESP32-S3 实拍，旋转后丝印朝正。图中下排从左至右，① 是标有 3V3 的最外侧针脚，② 是 15 和 17 之间标有 16 的针脚，③ 是 USB 侧紧靠 5Vin 的 G。">
+            <svg class="wiring-overlay" viewBox="0 0 1120 660" aria-hidden="true">
+              <g class="pin-power">
+                <path d="M84 477v34l46 37v25"/><circle cx="84" cy="463" r="13"/>
+                <rect x="33" y="573" width="194" height="60" rx="22"/><text x="130" y="605">① 3V3</text>
+              </g>
+              <g class="pin-data">
+                <path d="M435 483v35l24 30v25"/><circle cx="435" cy="469" r="13"/>
+                <rect x="325" y="573" width="268" height="60" rx="22"/><text x="459" y="605">② GPIO16</text>
+              </g>
+              <g class="pin-ground">
+                <path d="M1028 494v32l-50 25v22"/><circle cx="1028" cy="480" r="13"/>
+                <rect x="863" y="573" width="230" height="60" rx="22"/><text x="978" y="605">③ G / GND</text>
+              </g>
+            </svg>
+          </div>
+          <figcaption><strong>ESP32-S3 开发板</strong><span>照片已旋转，方便读丝印。找相邻 <code>15</code> 和 <code>17</code> 中间的 <code>16</code>。<code>G</code> 是地，旁边的 <code>5Vin</code> 留空。</span></figcaption>
+        </figure>
+        <figure class="wiring-photo">
+          <div class="wiring-frame">
+            <img src="./assets/wiring/ds18b20-labels.webp" width="620" height="370" loading="lazy" decoding="async" alt="DS18B20 三针模块实拍，图中从左到右的丝印是 ① VCC、② DQ、③ GND。">
+            <svg class="wiring-overlay wiring-overlay-probe" viewBox="0 0 620 370" aria-hidden="true">
+              <g class="pin-power">
+                <path d="M252 298v7l-98 22"/><circle cx="252" cy="294" r="4"/>
+                <rect x="60" y="322" width="106" height="34" rx="12"/><text x="113" y="340">① VCC</text>
+              </g>
+              <g class="pin-data">
+                <path d="M299 289v14l11 19"/><circle cx="299" cy="285" r="4"/>
+                <rect x="263" y="322" width="94" height="34" rx="12"/><text x="310" y="340">② DQ</text>
+              </g>
+              <g class="pin-ground">
+                <path d="M350 280v24l112 23"/><circle cx="350" cy="276" r="4"/>
+                <rect x="451" y="322" width="113" height="34" rx="12"/><text x="508" y="340">③ GND</text>
+              </g>
+            </svg>
+          </div>
+          <figcaption><strong>DS18B20 三针模块</strong><span>这块模块的丝印是 <code>VCC / DQ / GND</code>。有的模块会把 <code>VCC</code> 写成 <code>VDD</code>，把 <code>DQ</code> 写成 <code>DATA</code>。</span></figcaption>
+        </figure>
+      </div>
+
+      <div class="wiring-guide">
+        <div class="wiring-checklist">
+          <table class="wiring-map">
+            <caption>接线对照表</caption>
+            <thead><tr><th scope="col">DS18B20 模块</th><th scope="col">ESP32-S3 开发板</th></tr></thead>
+            <tbody>
+              <tr class="pin-power"><th scope="row"><span aria-hidden="true">①</span> VCC / VDD</th><td><strong>3V3</strong><small>3.3 V 供电</small></td></tr>
+              <tr class="pin-data"><th scope="row"><span aria-hidden="true">②</span> DQ / DATA</th><td><strong>GPIO16</strong><small>找板上标 <code>16</code> 的针脚</small></td></tr>
+              <tr class="pin-ground"><th scope="row"><span aria-hidden="true">③</span> GND</th><td><strong>G / GND</strong><small>共地</small></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="wiring-checklist">
+          <h3>检查 DQ 上拉</h3>
+          <p>裸探头或确认没有板载上拉的模块，在 <code>DQ</code> 和 <code>3V3</code> 之间跨接一颗 <strong>4.7 kΩ</strong> 电阻。已确认模块自带这颗上拉时，直接接上面三根线即可。</p>
+          <svg class="pullup-diagram" viewBox="0 0 440 124" role="img" aria-labelledby="pullup-title">
+            <title id="pullup-title">DQ 与 GPIO16 直接相连，4.7 kΩ 电阻从数据线的分支接到 3V3，电阻不串在数据线上。</title>
+            <path d="M123 87H331" class="pullup-data"/>
+            <path d="M218 87v-8l-6-5 12-7-12-7 12-7-6-5V34" class="pullup-branch"/>
+            <circle cx="218" cy="87" r="5"/>
+            <text x="218" y="23" text-anchor="middle">3V3</text><text x="234" y="66">4.7 kΩ</text>
+            <text x="112" y="94" text-anchor="end">DQ</text><text x="342" y="94">GPIO16</text>
+          </svg>
+        </div>
+      </div>
+
+      <p class="wiring-power-note"><strong>接完再上电。</strong> <code>VCC</code> 和上拉电阻只接 <code>3V3</code>，别接 <code>5V / 5Vin</code>。检查三根线对应无误、<code>3V3</code> 和 <code>GND</code> 没有短接，再用一根能传数据的 USB 线连接电脑。开发板通过 USB 供电即可。</p>
+      <details class="wiring-overview">
+        <summary>查看整套实物接线</summary>
+        <figure>
+          <img src="./assets/wiring/bench-overview.webp" width="1149" height="912" loading="lazy" decoding="async" alt="实物接线总览，开发板插在面包板上，通过跳线连接左下方的三针温度模块。">
+          <figcaption>照片里用面包板做了转接。初次接线只需对照三组针脚和上拉检查，无需照搬额外跳线。<a href="https://github.com/bealuxDream/temperature-emotion-box/blob/main/docs/hardware.md">查看硬件与联调文档 ↗</a></figcaption>
+        </figure>
+      </details>
+    </section>
+
     <section class="install" id="install" aria-labelledby="install-heading">
       <div class="install-lead">
         <div class="section-label"><svg aria-hidden="true"><use href="#i-chip"/></svg> 开始使用</div>
@@ -148,7 +237,7 @@
       </div>
       <ol class="install-steps">
         <li><strong>下载并启动</strong><p>解压 Windows 新手包，双击 <code>Start.cmd</code>。先复用已有兼容 Node、pnpm、dsh，仅缺少时从国内镜像补装。双击 <code>Stop.cmd</code> 停止；<code>Uninstall.cmd</code> 仅卸载项目下载组件，复用软件和个人数据保留。</p></li>
-        <li><strong>接上开发板并设置舒适区</strong><p>首次接入时可为兼容板烧录公开固件，再连接 DS18B20，确认面板显示真实温度。</p><a href="./flash/">浏览器刷写固件 ↗</a> <a href="https://github.com/bealuxDream/temperature-emotion-box#接线与烧录">接线与固件指南 ↗</a></li>
+        <li><strong>接上开发板并设置舒适区</strong><p>首次接入时可为兼容板烧录公开固件，再连接 DS18B20，确认面板显示真实温度。</p><a href="./flash/">浏览器刷写固件 ↗</a> <a href="#wiring">按实拍图接线 ↓</a></li>
         <li><strong>跟随首次聊天配置向导</strong><p>没有可选模型时，面板自动弹出三步向导：准备密钥 → 打开 dsh 配置 → 检查模型并试聊。密钥填在 dsh 原生「左下账号菜单 → 设置 → 模型」中，可稍后配置或随时重开。选择模型和默认工作区后，询问「现在真实温度是多少？请使用温度查询工具。」并核对面板。</p><a href="https://github.com/bealuxDream/temperature-emotion-box/blob/main/docs/windows-quickstart.md">Windows 新手指南 ↗</a></li>
       </ol>
       <details class="plugin-install" id="dsh-install">
