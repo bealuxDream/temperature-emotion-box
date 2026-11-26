@@ -1,17 +1,68 @@
-const slider = document.getElementById('room-temperature');
-const face = document.getElementById('face');
-function render() {
-  const value = Number(slider.value);
-  const cold = value < 20, hot = value > 25;
-  document.getElementById('temperature').textContent = value;
-  document.getElementById('slider-value').textContent = value + '°C';
-  face.className = 'face ' + (cold ? 'cold' : hot ? 'hot' : 'comfortable');
-  const state = cold ? '这里有一点凉意' : hot ? '这里有一点热呢' : '刚刚好，想陪你待一会儿';
-  face.setAttribute('aria-label', state);
-  document.getElementById('feeling').textContent = state;
-  document.getElementById('mood').textContent = cold ? '安静柔和' : hot ? '活泼急切' : '温柔自然';
-  document.getElementById('length').textContent = cold ? '回复简短' : hot ? '多一点回应' : '话量适中';
-  document.getElementById('reply').textContent = cold ? '辛苦啦，歇一会儿吧。' : hot ? '终于收工啦！今天也太努力了，给你一个大大的击掌！先把待办放下，想聊聊今天最开心的事吗？' : '辛苦啦，今天也很棒。来，陪你歇一会儿。';
+const slider = document.querySelector('#room-temperature');
+const moodButtons = document.querySelectorAll('[data-select-mood]');
+const sliderValue = document.querySelector('#slider-value');
+const heroTemperature = document.querySelector('#hero-temp');
+const dockState = document.querySelector('#dock-state');
+const sampleMessage = document.querySelector('#sample-message');
+const chart = document.querySelector('#chart');
+const chartLine = document.querySelector('#chart-line');
+const chartArea = document.querySelector('#chart-area');
+const historyEmpty = document.querySelector('#history-empty');
+
+const moods = {
+  cold: { temperature: 17, label: '偏凉', message: '辛苦啦，歇一会儿吧。' },
+  comfy: { temperature: 24, label: '刚刚好', message: '辛苦啦，今天也很棒。来，陪你歇一会儿。' },
+  warm: { temperature: 31, label: '偏热', message: '终于收工啦！今天也太努力了，给你一个大大的击掌！先把待办放下，想聊聊今天最开心的事吗？' }
+};
+
+const min = Number(slider.min);
+const max = Number(slider.max);
+const history = [];
+
+function plotTemperature(temperature) {
+  if (history.at(-1) === temperature) return;
+
+  history.push(temperature);
+  if (history.length > 30) history.shift();
+  if (history.length < 2) return;
+
+  const points = history.map((value, index) => {
+    const x = 7 + index * 866 / (history.length - 1);
+    const y = 126 - (value - min) * 112 / (max - min);
+    return `${x.toFixed(2)},${y.toFixed(2)}`;
+  }).join(' ');
+  chartLine.setAttribute('points', points);
+  chartArea.setAttribute('d', `M ${points} L 873,140 7,140 Z`);
+  chart.removeAttribute('hidden');
+  historyEmpty.hidden = true;
 }
+
+function render() {
+  const temperature = Number(slider.value);
+  const mood = temperature < 20 ? 'cold' : temperature > 25 ? 'warm' : 'comfy';
+  const { label, message } = moods[mood];
+
+  heroTemperature.textContent = temperature;
+  sliderValue.value = `${temperature} °C`;
+  slider.setAttribute('aria-valuetext', `${temperature} 摄氏度，${label}`);
+  slider.style.setProperty('--value', `${(temperature - min) / (max - min) * 100}%`);
+  plotTemperature(temperature);
+
+  if (document.body.dataset.mood === mood) return;
+
+  document.body.dataset.mood = mood;
+  dockState.textContent = `示例 · ${label}`;
+  sampleMessage.textContent = message;
+  moodButtons.forEach((button) => {
+    button.setAttribute('aria-pressed', String(button.dataset.selectMood === mood));
+  });
+}
+
 slider.addEventListener('input', render);
+moodButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    slider.value = moods[button.dataset.selectMood].temperature;
+    render();
+  });
+});
 render();
