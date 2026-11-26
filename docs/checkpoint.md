@@ -103,3 +103,5 @@ c6961e4121e5c5ee33b026d94f845f9945b7c80bdabb25a9490de657058b2b39  temperature-em
 - `npm test` 16/16 通过；公共网页/包内固件资源校验通过。最终 ZIP 解压与插件校验通过，Windows PowerShell 5.1 WPF 解析通过。
 - 最终镜像版 ZIP SHA-256：`b127357cd076897fb53abdc586b4df96abbd28538761438c1f8a9e4d58ab6c89`。本轮无硬件连接、固件刷写或模型请求，硬件边界沿用 v0.4.0 记录。
 - 用最终 ZIP 解压内容对旧版 `.local/windows-clean-test` 执行 v0.4.0 → v0.4.1 启动器升级通过，版本标记更新，偏好文件哈希不变，插件健康版本保持 0.4.0；测试服务随后正常停止。
+- 实现提交 `338aed24ef2940315061f0554124325eb81a70aa` 已推送，Release v0.4.1 已发布。Windows CI [45755245835](https://github.com/bealuxDream/temperature-emotion-box/actions/runs/45755245835) 与 Pages [45755245783](https://github.com/bealuxDream/temperature-emotion-box/actions/runs/45755245783) 均成功；线上 HTML 已核验新版下载入口和国内镜像说明。
+- GitHub 资产服务器 SHA-256 与本地 ZIP 一致；公网直链复核遇到连接重置，随后通过官方 `gh release download` 下载成功并比对 SHA-256 一致。安装包托管按用户要求继续使用 GitHub，不宣称 GitHub 直链在国内稳定可达。
