@@ -334,3 +334,28 @@ svg.pullup-diagram { display: block; width: min(100%, 440px); height: auto; marg
   .top-nav { gap: 2px; max-width: 100%; flex-wrap: wrap; font-size: 12px; }
   .top-nav a { padding-inline: 7px; }
 }
+
+.wiring-model { margin: 0 0 14px; overflow: hidden; border: 1px solid #dbe4ce; border-radius: 22px; background: #fafbf2; }
+.wiring-model figcaption { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 16px 18px 12px; }
+.wiring-model h3 { margin: 0 0 4px; font-size: 17px; }
+.wiring-model p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.65; }
+.wiring-stage { position: relative; height: clamp(260px, 45vw, 520px); background: radial-gradient(ellipse at 56% 43%, #fbfdf3, #e3ecd9 85%); border-block: 1px solid #dce5d2; }
+.wiring-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.wiring-solid { cursor: grab; touch-action: none; }
+.wiring-solid:active { cursor: grabbing; }
+.wiring-solid:focus-visible { outline-offset: -4px; }
+.wiring-labels { pointer-events: none; }
+.wiring-views, .wiring-signal-controls { display: flex; flex-wrap: wrap; gap: 6px; }
+.wiring-views[hidden], .wiring-model-tools[hidden], .wiring-stage[hidden] { display: none; }
+.wiring-views button, .wiring-signal-controls button { min-height: 39px; border: 1px solid #d8e3d0; border-radius: 100px; padding: 5px 11px; background: #fffdf7; color: var(--pin, #354638); font-size: 13px; font-weight: 720; }
+.wiring-views button:hover, .wiring-signal-controls button:hover { border-color: var(--pin, #57744c); }
+.wiring-signal-controls button[aria-pressed="true"] { border-color: var(--pin, #365539); background: var(--pin, #365539); color: #fffdf7; }
+.wiring-model-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 12px 18px 0; }
+.wiring-model p.wiring-model-note { padding: 10px 18px 14px; }
+.wiring-model-note a { color: #355643; text-decoration: underline; text-underline-offset: 2px; }
+#dq-pullup { scroll-margin-top: 18px; }
+@media (max-width: 540px) {
+  .wiring-model { margin-bottom: 9px; }
+  .wiring-model figcaption, .wiring-model-tools, .wiring-model p.wiring-model-note { padding-inline: 12px; }
+  .wiring-stage { height: clamp(245px, 70vw, 330px); }
+}
