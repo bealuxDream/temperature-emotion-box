@@ -7,6 +7,7 @@ import { runtimePath } from './run-dsh.mjs';
 import { root } from './setup.mjs';
 
 const packageInfo=JSON.parse(await readFile(resolve(root,'plugins/temperature/package.json'),'utf8'));
+const sources=JSON.parse(await readFile(resolve(root,'windows/download-sources.json'),'utf8'));
 const tarball=resolve(root,'.local',packageInfo.name+'-'+packageInfo.version+'.tgz');
 await access(tarball);
 const profile=resolve(root,'.local/dsh/profiles/web');
@@ -27,7 +28,7 @@ await mkdir(dirname(profile),{recursive:true});
 let moved=false;
 try{await rename(profile,backup);moved=true;}catch(error){if(error.code!=='ENOENT')throw error;}
 try{
-  const result=spawnSync(runtimePath(),[dshBin,'plugin','--profile','web','add',tarball],{cwd:root,env:{...process.env,DSH_HOME:resolve(root,'.local/dsh')},stdio:'inherit',windowsHide:true});
+  const result=spawnSync(runtimePath(),[dshBin,'plugin','--profile','web','add',tarball,'--registry='+sources.registry],{cwd:root,env:{...process.env,DSH_HOME:resolve(root,'.local/dsh'),npm_config_registry:sources.registry,npm_config_disturl:sources.nodeDistributionUrl,npm_config_node_mirror:sources.nodeDistributionUrl,NODEJS_ORG_MIRROR:sources.nodeDistributionUrl},stdio:'inherit',windowsHide:true});
   if(result.error)throw result.error;
   if(result.status!==0)throw new Error('插件安装失败（退出码 '+result.status+'）。');
   if(moved)await copyFile(resolve(backup,'cordis.patch.yml'),resolve(profile,'cordis.patch.yml')).catch(e=>{if(e.code!=='ENOENT')throw e;});

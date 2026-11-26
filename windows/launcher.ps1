@@ -46,6 +46,23 @@ function Run-Native([string]$exe,[string[]]$arguments,[string]$label,[string]$cw
 function Start-Companion {
   if(-not [Environment]::Is64BitOperatingSystem -or $env:PROCESSOR_ARCHITECTURE -eq 'ARM64'){throw 'This package supports Windows x64.'}
   $manifest=Get-Content (Join-Path $PackageRoot 'manifest.json') -Raw|ConvertFrom-Json
+  $sources=Get-Content (Join-Path $PackageRoot 'download-sources.json') -Raw|ConvertFrom-Json
+  foreach($address in @($sources.registry,$sources.nodeDistributionUrl)){
+    $uri=[Uri]$address
+    if(-not $uri.IsAbsoluteUri -or $uri.Scheme -ne 'https'){throw 'Download mirrors must use absolute HTTPS URLs.'}
+  }
+  if($sources.nodeVersion -ne '24.11.1' -or $sources.nodeZipSha256 -notmatch '^[0-9a-f]{64}$'){throw 'Invalid runtime download configuration.'}
+  # Only this launcher and its child npm/pnpm/dsh processes use these settings.
+  # A private userconfig prevents a user's global registry or scope override leaking in.
+  $npmrc=Join-Path $DataDirectory 'npmrc'
+  $npmConfig="registry=$($sources.registry)"+[char]10+"@deepseek-ai:registry=$($sources.registry)"+[char]10+"disturl=$($sources.nodeDistributionUrl)"+[char]10+"node_mirror=$($sources.nodeDistributionUrl)"+[char]10
+  [IO.File]::WriteAllText($npmrc,$npmConfig,[Text.UTF8Encoding]::new($false))
+  $env:npm_config_userconfig=$npmrc
+  $env:npm_config_registry=$sources.registry
+  $env:npm_config_disturl=$sources.nodeDistributionUrl
+  $env:npm_config_node_mirror=$sources.nodeDistributionUrl
+  $env:NODEJS_ORG_MIRROR=$sources.nodeDistributionUrl
+  Write-Output ('安装下载使用国内镜像：'+$sources.registry)
   $archive=Join-Path $PackageRoot $manifest.pluginFile
   if(-not (Test-Path -LiteralPath $archive)){throw 'Plugin missing. Extract the whole ZIP first.'}
   if((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash -ne $manifest.pluginSha256){throw 'Plugin checksum mismatch. Download a fresh ZIP.'}
@@ -60,17 +77,26 @@ function Start-Companion {
   $runtime=Join-Path $DataDirectory 'runtime/node-v24.11.1-win-x64'
   $node=Join-Path $runtime 'node.exe'
   if(-not (Test-Path -LiteralPath $node)){
-    Write-Output '首次准备：从 nodejs.org 下载并校验独立 Node 24.11.1…'
+    Write-Output '首次准备：从国内镜像下载并校验独立 Node 24.11.1…'
     [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
-    $base='https://nodejs.org/dist/v24.11.1/'
+    $base=$sources.nodeDistributionUrl.TrimEnd('/')+'/v'+$sources.nodeVersion+'/'
     $nodeName='node-v24.11.1-win-x64.zip'
     $zip=Join-Path $DataDirectory ('runtime/'+$nodeName)
-    $sums=(Invoke-WebRequest ($base+'SHASUMS256.txt') -UseBasicParsing).Content
-    $lines=@($sums -split ([char]10)|Where-Object{$_ -match ('\s'+[regex]::Escape($nodeName)+'\s*$')})
-    if($lines.Count -ne 1){throw 'Official runtime checksum unavailable.'}
-    $expected=($lines[0].Trim() -split '\s+')[0]
-    Invoke-WebRequest ($base+$nodeName) -OutFile $zip -UseBasicParsing
-    if((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash -ne $expected){throw 'Runtime checksum mismatch.'}
+    $downloaded=$false
+    $previousProgress=$ProgressPreference
+    try{
+      $ProgressPreference='SilentlyContinue'
+      for($attempt=1;$attempt -le 3;$attempt++){
+        try{
+          Write-Output ('Node 下载 '+$attempt+'/3：'+$base+$nodeName)
+          Invoke-WebRequest ($base+$nodeName) -OutFile $zip -UseBasicParsing -TimeoutSec 360
+          # This pinned digest was verified against the official v24.11.1 release.
+          if((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash -ne $sources.nodeZipSha256){throw 'Runtime checksum mismatch.'}
+          $downloaded=$true;break
+        }catch{Write-Output ('镜像下载或校验失败：'+$_.Exception.Message)}
+      }
+    }finally{$ProgressPreference=$previousProgress}
+    if(-not $downloaded){throw '国内 Node 镜像下载失败。请检查网络后重试；不会自动改用官方源。'}
     Expand-Archive -LiteralPath $zip -DestinationPath (Join-Path $DataDirectory 'runtime') -Force
   }
   $env:PATH=$runtime+';'+(Join-Path $DataDirectory 'host/node_modules/.bin')+';'+$env:PATH
@@ -80,7 +106,7 @@ function Start-Companion {
     Write-Output '正在准备独立的 DeepSeek Harness，不更改现有全局安装。'
     $hostManifest='{"private":true,"dependencies":{"@deepseek-ai/dsh":"0.2.2-rc.1","pnpm":"10.25.0"}}'
     [IO.File]::WriteAllText((Join-Path $hostDir 'package.json'),$hostManifest,[Text.UTF8Encoding]::new($false))
-    Run-Native $node @((Join-Path $runtime 'node_modules/npm/bin/npm-cli.js'),'install','--no-audit','--no-fund','--registry=https://registry.npmjs.org') '安装 Harness（首次需要联网）' $hostDir
+    Run-Native $node @((Join-Path $runtime 'node_modules/npm/bin/npm-cli.js'),'install','--no-audit','--no-fund',('--registry='+$sources.registry)) '从国内镜像安装 Harness（首次需要联网）' $hostDir
     [IO.File]::WriteAllText($marker,'dsh-0.2.2-rc.1')
   }
   $env:DSH_HOME=Join-Path $DataDirectory 'dsh'
@@ -95,7 +121,7 @@ function Start-Companion {
       Move-Item -LiteralPath $resolved -Destination $backup
     }
     try{
-      Run-Native $node @($dsh,'plugin','--profile','web','add',$archive) '安装温度插件' $DataDirectory
+      Run-Native $node @($dsh,'plugin','--profile','web','add',$archive,('--registry='+$sources.registry)) '从国内镜像安装温度插件依赖' $DataDirectory
       if($backup -and (Test-Path (Join-Path $backup 'cordis.patch.yml'))){Copy-Item -LiteralPath (Join-Path $backup 'cordis.patch.yml') -Destination (Join-Path $profile 'cordis.patch.yml')}
       [IO.File]::WriteAllText($versionFile,$manifest.version)
     }catch{

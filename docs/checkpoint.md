@@ -92,3 +92,14 @@ c6961e4121e5c5ee33b026d94f845f9945b7c80bdabb25a9490de657058b2b39  temperature-em
 - GitHub Pages [45745964355](https://github.com/bealuxDream/temperature-emotion-box/actions/runs/45745964355) 成功；线上浏览器已见 v0.4.0 新手包入口，刷写页显示“浏览器支持，公开固件完整性检查通过”。未请求设备访问、未刷写实板。
 - 最终隔离测试 runner 与 dsh 均已停止，并按 PID 确认退出；备份和隔离日志仍在 Git 忽略目录，用户原有数据未迁移或个性化。
 - 下一步实体验收：使用兼容开发板验证浏览器刷写、UART0/原生 USB 两条链路、DQ16 实测、拔插探头与恢复，再由使用者在界面填写舒适偏好及模型密钥，验证真实温度工具和普通聊天。
+
+## 国内镜像安装器 v0.4.1 · 2026-11-26
+
+- 按用户要求仅镜像化安装器下载，ZIP 与静态宣传页继续托管 GitHub。Windows 安装器版本独立升至 v0.4.1，内含已发布且哈希不变的标准插件 v0.4.0；公开固件仍为 v0.4.0。
+- Node 24.11.1 从 `https://npmmirror.com/mirrors/node/`（可跳转其 CDN）下载，固定 SHA-256 `5355ae6d7c49eddcfde7d34ac3486820600a831bf81dc3bdca5c8db6a9bb0e76`，与此前官方来源校验过的文件以及本次镜像值一致；失败最多三次重试，不回退官方源。
+- npm/pnpm、官方 dsh 及插件依赖默认使用 `https://registry.npmmirror.com`，在私有 npmrc、子进程环境及 dsh 插件安装命令中传递；原生模块如需 Node headers 也配置国内镜像。只修改独立数据目录，不写入用户全局 npm 配置。源码安装通过项目 .npmrc 与明确 registry 参数走同一镜像。
+- 可重复联网验收脚本为 `scripts/verify-windows-mirrors.ps1`。本轮使用全新 `.local/mirror-install-5fddab0df1574142bc55787e48fb9e80`，独立空 npm cache/pnpm store，没有复用上轮缓存；故意设置父进程官方 registry 与 scope 配置，启动器覆盖成功且父配置哈希未变。
+- 实际从镜像下载 36,343,385 B Node ZIP 并通过固定哈希；宿主首次 npm 安装 655 个包，锁文件共 725 项 HTTPS 解析地址均属 npmmirror，HTTP 日志有实际镜像 cache miss 请求且未见官方 Node/npm 地址。dsh 安装标准插件后健康检查成功，子 pnpm 实际读取镜像与独立 store，重复启动复用同一 runner；测试 finally 停止自身服务。
+- `npm test` 16/16 通过；公共网页/包内固件资源校验通过。最终 ZIP 解压与插件校验通过，Windows PowerShell 5.1 WPF 解析通过。
+- 最终镜像版 ZIP SHA-256：`b127357cd076897fb53abdc586b4df96abbd28538761438c1f8a9e4d58ab6c89`。本轮无硬件连接、固件刷写或模型请求，硬件边界沿用 v0.4.0 记录。
+- 用最终 ZIP 解压内容对旧版 `.local/windows-clean-test` 执行 v0.4.0 → v0.4.1 启动器升级通过，版本标记更新，偏好文件哈希不变，插件健康版本保持 0.4.0；测试服务随后正常停止。

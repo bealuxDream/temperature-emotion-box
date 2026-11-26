@@ -1,6 +1,8 @@
-# Windows 新手包 v0.4.0
+# Windows 新手包 v0.4.1
 
-支持 Windows 10/11 x64。首次联网自动准备 Node 24.11.1、pnpm10.25.0、官方dsh0.2.2-rc.1，不需手工安装开发工具、不需管理员权限。不是离线包，需要访问 nodejs.org、npm、GitHub。
+支持 Windows 10/11 x64。首次联网从国内 npmmirror 镜像自动准备 Node 24.11.1、pnpm10.25.0、官方dsh0.2.2-rc.1，不需手工安装开发工具、不需管理员权限。插件和固件仍为 v0.4.0。安装包下载与宣传页继续放在 GitHub。
+
+Node 下载走 `https://npmmirror.com/mirrors/node/`（可能跳转至其 CDN），SHA-256 固定在包内，与已验证的官方发布值一致；npm、pnpm 和 dsh 安装插件的依赖都走 `https://registry.npmmirror.com`。镜像故障时提示重试，不自动改回官方源。配置仅作用于安装器及其子进程，不修改全局 npm 配置。仍需联网；DeepSeek API 请求继续访问模型服务商。
 
 1. 解压整个 ZIP 到普通本地目录，不要在压缩包预览内运行。
 2. 双击 Start.cmd，窗口显示准备进度；首次可能需要几分钟。完成后自动打开本机面板。
