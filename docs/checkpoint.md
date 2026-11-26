@@ -83,3 +83,12 @@
 13decd477bdbe4987782cb0d28c18c20aa4bfb0dc530f7393e70ce7db596d670  temperature-emotion-box-windows-v0.4.0.zip
 c6961e4121e5c5ee33b026d94f845f9945b7c80bdabb25a9490de657058b2b39  temperature-emotion-box-esp32s3-v0.4.0.bin
 ```
+
+## v0.4.0 公开发布复核 · 2026-11-26
+
+- 实现提交 `c2792d2123f53b4d3d4043d24f773856a90617dd` 已推送组织 main；Release v0.4.0 已发布四项资产（Windows ZIP、标准 tgz、公开固件、SHA256SUMS），v0.3.0 保留。
+- 从公共 Release URL 重新下载三个文件，SHA-256 与上述本地发布值逐项一致；公开 SHA256SUMS 文本也一致。
+- GitHub Windows 验证工作流 [45745964322](https://github.com/bealuxDream/temperature-emotion-box/actions/runs/45745964322) 成功：联网 npm ci、16 项测试和站点/插件公开资源完整性校验全部通过。
+- GitHub Pages [45745964355](https://github.com/bealuxDream/temperature-emotion-box/actions/runs/45745964355) 成功；线上浏览器已见 v0.4.0 新手包入口，刷写页显示“浏览器支持，公开固件完整性检查通过”。未请求设备访问、未刷写实板。
+- 最终隔离测试 runner 与 dsh 均已停止，并按 PID 确认退出；备份和隔离日志仍在 Git 忽略目录，用户原有数据未迁移或个性化。
+- 下一步实体验收：使用兼容开发板验证浏览器刷写、UART0/原生 USB 两条链路、DQ16 实测、拔插探头与恢复，再由使用者在界面填写舒适偏好及模型密钥，验证真实温度工具和普通聊天。
