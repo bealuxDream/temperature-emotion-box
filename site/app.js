@@ -66,3 +66,31 @@ moodButtons.forEach((button) => {
   });
 });
 render();
+
+const showcaseVideo = document.querySelector('#showcase-video');
+const showcasePlay = document.querySelector('.story-play');
+const showcaseError = document.querySelector('.story-error');
+
+function playShowcase(start) {
+  showcaseError.hidden = true;
+  showcaseVideo.currentTime = start;
+  showcaseVideo.play().catch((error) => {
+    if (error.name !== 'AbortError') showcaseError.hidden = false;
+  });
+}
+
+showcasePlay.hidden = false;
+showcasePlay.addEventListener('click', () => {
+  showcaseVideo.focus({ preventScroll: true });
+  playShowcase(0);
+});
+showcaseVideo.addEventListener('play', () => { showcasePlay.hidden = true; });
+showcaseVideo.addEventListener('error', () => { showcaseError.hidden = false; });
+document.querySelectorAll('[data-video-time]').forEach((chapter) => {
+  chapter.addEventListener('click', (event) => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    showcaseVideo.scrollIntoView({ block: 'nearest' });
+    playShowcase(Number(chapter.dataset.videoTime));
+  });
+});
