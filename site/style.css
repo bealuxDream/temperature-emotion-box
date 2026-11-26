@@ -253,6 +253,12 @@ h1 { margin: 22px 0 19px; font-size: clamp(32px, 4.05vw, 61px); letter-spacing: 
 .install-steps strong { font-size: 14px; }
 .install-steps p { margin-top: 3px; }
 .install-steps a { display: inline-block; margin-top: 5px; margin-right: 9px; color: #455927; text-decoration: underline; text-underline-offset: 2px; font-size: 12px; }
+.plugin-install { grid-column: 1 / -1; border-top: 1px solid #cdd7b2; padding-top: 18px; min-width: 0; }
+.plugin-install summary { cursor: pointer; font-size: 16px; font-weight: 700; }
+.plugin-install p, .plugin-install ol { margin-top: 12px; }
+.plugin-install ol { padding-left: 22px; font-size: 13px; line-height: 1.8; color: var(--muted); }
+.plugin-install pre { max-width: 100%; overflow-x: auto; padding: 16px; border-radius: 14px; background: #26332b; color: #f1f5e9; font-size: 12px; line-height: 1.9; }
+.plugin-install a { display: inline-block; margin-top: 8px; color: #455927; text-decoration: underline; text-underline-offset: 3px; font-size: 13px; }
 
 @media (max-width: 760px) {
   .lab-console { grid-template-columns: 1fr; gap: 8px; margin-top: 8px; }

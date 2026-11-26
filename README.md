@@ -29,14 +29,26 @@ ESP32-S3 + DS18B20 实时测温，以 **DeepSeek 官方 Harness（dsh）** 作�
 $env:npm_config_registry="https://registry.npmmirror.com"
 npm install -g pnpm@10.25.0 @deepseek-ai/dsh@0.2.2-rc.1 --registry=https://registry.npmmirror.com
 ~~~
-## 安装与使用
+## 已有 dsh：安装标准插件
 
-先到 [GitHub Releases](https://github.com/bealuxDream/temperature-emotion-box/releases/latest) 下载插件安装包。如果已有 DeepSeek Harness Web 0.2.2-rc.1，把 `dsh-temperature-emotion-box-0.4.2.tgz` 安装到 `web` profile。安装后启动 dsh，打开 [温度表情箱](http://127.0.0.1:8787/)。
+已在 **Windows x64、Node 24.11.1、官方 DeepSeek Harness Web 0.2.2-rc.1** 的全新 profile 中实际验证标准插件安装、列表识别与启动。最低 Node 版本为 24.9；需要 pnpm 可在 PATH 中运行，其他 dsh 版本尚未验证。此路径不需要 Windows 新手 ZIP，也不需要克隆源码。
+
+1. 下载 [标准插件 dsh-temperature-emotion-box-0.4.2.tgz](https://github.com/bealuxDream/temperature-emotion-box/releases/download/v0.4.2/dsh-temperature-emotion-box-0.4.2.tgz)，保持 tgz 原样，不要解压。
+2. 先停止要安装或升级的 dsh Web 实例，避免原生串口依赖被占用。把下面路径替换为下载文件的完整路径，在终端执行：
 
 ```powershell
 dsh plugin --profile web add "C:\path\to\dsh-temperature-emotion-box-0.4.2.tgz" --registry=https://registry.npmmirror.com
+dsh plugin --profile web list --depth=0
 dsh web
 ```
+
+3. 列表应包含 `dsh-temperature-emotion-box 0.4.2`。启动后，dsh 的「插件」页应显示 **Temperature Emotion Box** 已启用，日志应打印温度面板就绪地址；这两项用于确认安装和加载成功。
+4. 面板首次会尝试自动打开；若没有打开，使用日志中的实际地址（默认 `http://127.0.0.1:8787/`，被占用时会换端口）。没有可选模型时，面板自动弹出聊天配置向导，也可点击「打开聊天配置向导」重开。
+5. 按面板引导连接设备、填写自己的舒适温度，并在 dsh 原生「设置 → 模型」保存 API Key。选择模型和默认工作区，发送「现在真实温度是多少？请使用温度查询工具。」核对工具结果和面板读数。检测到模型或安装成功，都不等于真实模型回复已验证。
+
+标准插件安装和依赖走上面的国内镜像；包本身由 GitHub 下载。无设备时应显示等待或无法获取温度，不会用演示值代替测量。卸载时先停止 dsh，执行 `dsh plugin --profile web remove dsh-temperature-emotion-box`，再重启。
+
+## 源码开发
 
 从本项目开发或更新时，在项目根目录执行以下命令。若旧版面板或 dsh 正在运行，先停止旧实例，释放 8787、3080 和串口。
 
@@ -54,7 +66,7 @@ npm run dev
 
 以上为默认地址；端口冲突时使用启动日志中的实际 URL，Windows 新手包由 Start.cmd 自动打开。
 
-点击表情面板右上角“打开 DeepSeek 聊天”，自动携带本次启动的本地访问令牌；直接打开没有令牌的 3080 地址可能返回 401。首次不一定弹出密钥向导：在 dsh 展开左侧边栏 → 左下账号菜单 → **设置 → 模型**，填写自己的 DeepSeek API Key 并保存，再回到聊天选择模型和默认工作区。安装独立插件不要求克隆本项目，密钥直接填本机界面。源码启动的专用 dsh 用户目录是 `.local/dsh/`；Windows 新手包使用前述独立数据目录。
+点击表情面板右上角“打开 DeepSeek 聊天”，自动携带本次启动的本地访问令牌；直接打开没有令牌的 3080 地址可能返回 401。温度面板提供自动配置向导，dsh 原生聊天页不保证自动打开模型设置：在 dsh 展开左侧边栏 → 左下账号菜单 → **设置 → 模型**，填写自己的 DeepSeek API Key 并保存，再回到聊天选择模型和默认工作区。安装独立插件不要求克隆本项目，密钥直接填本机界面。源码启动的专用 dsh 用户目录是 `.local/dsh/`；Windows 新手包使用前述独立数据目录。
 
 询问“现在温度是多少？”可触发查询工具。普通聊天的系统提示词会加入当次有效的实测温度，失联或过期时加入“目前无法获取到温度”。在面板「温度与聊天设置」可编辑这两段提示词、冷热情绪和 AI 自称。实测温度会持续影响回复长短与语气。日常聊天每轮有 17% 的机会顺带提及一句室温或冷暖，直接询问时照常查询。
 

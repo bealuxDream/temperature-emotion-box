@@ -143,14 +143,28 @@
       <div class="install-lead">
         <div class="section-label"><svg aria-hidden="true"><use href="#i-chip"/></svg> 开始使用</div>
         <h2 id="install-heading">给你的 AI<br>接上温度感。</h2>
-        <p>Windows x64 可用新手包。插件适配官方 DeepSeek Harness Web 0.2.2-rc.1，首次安装需联网。</p>
+        <p>第一次使用选 Windows x64 新手包；已有 dsh 可直接安装标准插件。适配官方 DeepSeek Harness Web 0.2.2-rc.1，首次安装需联网，环境和依赖默认走国内 npmmirror。</p>
         <a class="button button-dark" href="https://github.com/bealuxDream/temperature-emotion-box/releases/latest">查看安装包和发布说明 <svg aria-hidden="true"><use href="#i-up"/></svg></a>
       </div>
       <ol class="install-steps">
         <li><strong>下载并启动</strong><p>解压 Windows 新手包，双击 <code>Start.cmd</code>，按面板引导操作。双击 <code>Stop.cmd</code> 停止。</p></li>
         <li><strong>接上开发板并设置舒适区</strong><p>首次接入时可为兼容板烧录公开固件，再连接 DS18B20，确认面板显示真实温度。</p><a href="./flash/">浏览器刷写固件 ↗</a> <a href="https://github.com/bealuxDream/temperature-emotion-box#接线与烧录">接线与固件指南 ↗</a></li>
-        <li><strong>在本机打开聊天</strong><p>通过面板进入 DeepSeek Harness，在模型设置里填写自己的 API Key，试着问一句「现在温度是多少？」</p><a href="https://github.com/bealuxDream/temperature-emotion-box/blob/main/docs/windows-quickstart.md">Windows 新手指南 ↗</a></li>
+        <li><strong>跟随首次聊天配置向导</strong><p>没有可选模型时，面板自动弹出三步向导：准备密钥 → 打开 dsh 配置 → 检查模型并试聊。密钥填在 dsh 原生「左下账号菜单 → 设置 → 模型」中，可稍后配置或随时重开。选择模型和默认工作区后，询问「现在真实温度是多少？请使用温度查询工具。」并核对面板。</p><a href="https://github.com/bealuxDream/temperature-emotion-box/blob/main/docs/windows-quickstart.md">Windows 新手指南 ↗</a></li>
       </ol>
+      <details class="plugin-install" id="dsh-install">
+        <summary>已经有 dsh？直接安装标准插件</summary>
+        <p>无需 Windows 新手包或克隆源码。准备官方 dsh Web <strong>0.2.2-rc.1</strong>、<strong>Node ≥24.9</strong>，并确认 pnpm 可运行。Windows x64 已实际验证安装与加载，其他 dsh 版本尚未验证。</p>
+        <ol>
+          <li><a href="https://github.com/bealuxDream/temperature-emotion-box/releases/download/v0.4.2/dsh-temperature-emotion-box-0.4.2.tgz">下载标准插件 .tgz ↗</a>，保持原样，不要解压；先停止正在运行的 dsh。</li>
+          <li>将下方路径换成下载文件的完整路径，执行安装、检查和启动：</li>
+        </ol>
+        <pre><code>dsh plugin --profile web add "C:\Downloads\dsh-temperature-emotion-box-0.4.2.tgz" --registry=https://registry.npmmirror.com
+dsh plugin --profile web list --depth=0
+dsh web</code></pre>
+        <p>列表应出现 <code>dsh-temperature-emotion-box 0.4.2</code>，dsh「插件」页应显示 <strong>Temperature Emotion Box</strong> 已启用。打开日志中的温度面板地址（默认 8787 端口，冲突时自动换端口），跟随聊天配置向导、连接设备并试问真实温度。</p>
+        <p>安装或检测到模型只代表配置已加载；需要有效 API Key、真实工具结果和 AI 回复才能完成对话验证。没有设备时不会生成假温度。</p>
+        <a href="https://github.com/bealuxDream/temperature-emotion-box#已有-dsh安装标准插件">查看完整标准插件指南 ↗</a>
+      </details>
     </section>
   </main>
 
