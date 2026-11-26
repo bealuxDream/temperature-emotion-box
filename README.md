@@ -15,11 +15,11 @@ ESP32-S3 + DS18B20 实时测温，以 **DeepSeek 官方 Harness（dsh）** 作�
 
 ## Windows 新手安装（推荐）
 
-从 [Releases](https://github.com/bealuxDream/temperature-emotion-box/releases/latest) 下载 temperature-emotion-box-windows-v0.4.3.zip，解压后双击 Start.cmd。先检查并复用已安装且兼容的 Node（x64 ≥24.9）、pnpm（10.25 以上的 10.x）和官方 dsh（0.2.2-rc.1）；仅缺少时从国内 npmmirror 补装，不覆盖全局软件；之后双击即可打开，双击 Stop.cmd 停止。无需手动安装 Python、PlatformIO 或全局 Node，也不更改已有 dsh 环境。
+从 [Releases](https://github.com/bealuxDream/temperature-emotion-box/releases/latest) 下载 temperature-emotion-box-windows-v0.4.4.zip，解压后双击 Start.cmd。先检查并复用已安装且兼容的 Node（x64 ≥24.9）、pnpm（10.25 以上的 10.x）和官方 dsh（0.2.2-rc.1）；仅缺少时从国内 npmmirror 补装，不覆盖全局软件；之后双击即可打开，双击 Stop.cmd 停止。无需手动安装 Python、PlatformIO 或全局 Node，也不更改已有 dsh 环境。
 
 首次没有可选模型时，面板自动弹出三步聊天配置向导，可跳过或随时重开。密钥直接填写在 dsh 原生模型设置中，面板只检测可选模型，不代表真实回复已验证。随后跟随四步检查：连接设备 → 设置舒适区 → dsh 原生 API Key 引导 → 询问真实温度。未刷固件时可使用 [浏览器刷写页](https://bealuxdream.github.io/temperature-emotion-box/flash/) 或面板内入口；只适配 ESP32-S3 DevKitC-1-N8（8MB Flash、无PSRAM）兼容板。刷写需在 Edge/Chrome 手动选择设备、确认覆盖原程序。
 
-安装器 v0.4.3 需要补装时默认从 `npmmirror.com/mirrors/node/` 下载 Node，从 `registry.npmmirror.com` 下载 npm/pnpm 包及插件依赖；校验 Node 固定 SHA-256，不自动回退官方源。首次仍需联网，ZIP 和宣传页继续托管 GitHub。API Key、硬件和舒适偏好由使用者提供。插件为 v0.4.2，公开固件仍为 v0.4.0，实板验收状态见 [检查点](docs/checkpoint.md)。
+安装器 v0.4.4 需要补装时默认从 `npmmirror.com/mirrors/node/` 下载 Node，从 `registry.npmmirror.com` 下载 npm/pnpm 包及插件依赖；校验 Node 固定 SHA-256，不自动回退官方源。首次仍需联网，ZIP 和宣传页继续托管 GitHub。API Key、硬件和舒适偏好由使用者提供。插件为 v0.4.2，公开固件仍为 v0.4.0，实板验收状态见 [检查点](docs/checkpoint.md)。
 
 卸载时双击 `Uninstall.cmd` 或启动窗口的「卸载本项目组件」。只删除登记的项目下载和私有缓存，复用软件不动，聊天、密钥、个人偏好和工作区文件默认保留。安装成功后数据目录的 `manager/Uninstall.cmd` 也可使用；仅升级启动器、插件版本未变时不会重装插件。
 

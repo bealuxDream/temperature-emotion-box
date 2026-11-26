@@ -22,6 +22,7 @@ export async function inspectPackage(root,kind,{node=process.execPath,probe=exec
 export async function discoverTools({dataDirectory,commandDirectories=[],previous={},node=process.execPath,probe=execute}){
   previous??={};
   const roots=[join(dataDirectory,'host'),...commandDirectories];
+  const dataRoot=await realpath(dataDirectory).catch(()=>resolve(dataDirectory));
   const result={};
   for(const [kind,spec] of Object.entries(definitions)){
     const candidates=[join(dataDirectory,'host/node_modules',spec.name)];
@@ -33,7 +34,7 @@ export async function discoverTools({dataDirectory,commandDirectories=[],previou
     for(const candidate of new Set(candidates)){
       const found=await inspectPackage(candidate,kind,{node,probe});
       if(found){
-        const rel=relative(resolve(dataDirectory),found.root);
+        const rel=relative(dataRoot,found.root);
         result[kind]={...found,source:!isAbsolute(rel)&&rel!=='..'&&!rel.startsWith('..\\')&&!rel.startsWith('../')?'managed':'reused'};
         break;
       }

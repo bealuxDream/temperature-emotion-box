@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,mkdir,writeFile,rm} from 'node:fs/promises';
+import {mkdtemp,mkdir,writeFile,rm,symlink} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {discoverTools,inspectPackage} from '../windows/discover-tools.mjs';
@@ -32,4 +32,13 @@ test('incompatible, broken and misleading packages are rejected without being ch
   assert.equal(await inspectPackage(dir,'dsh',{probe:async()=>{throw new Error('broken');}}),null);
   await rm(join(dir,'lib/bin.js'));
   assert.equal(await inspectPackage(dir,'dsh'),null);
+});
+test('canonical data paths keep owned packages managed through a directory alias',async t=>{
+  const dir=await mkdtemp(join(tmpdir(),'temperature-tool-alias-'));
+  t.after(()=>rm(dir,{recursive:true,force:true}));
+  const actual=join(dir,'real data'),alias=join(dir,'alias');
+  await fixture(join(actual,'host/node_modules/pnpm'),'pnpm','10.25.0','bin/pnpm.cjs');
+  await symlink(actual,alias,process.platform==='win32'?'junction':'dir');
+  const found=await discoverTools({dataDirectory:alias,probe:async()=>({stdout:'10.25.0'})});
+  assert.equal(found.pnpm.source,'managed');
 });
