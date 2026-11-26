@@ -114,3 +114,5 @@ c6961e4121e5c5ee33b026d94f845f9945b7c80bdabb25a9490de657058b2b39  temperature-em
 - 软件测试 19/19 通过，新增配置缺失/已加载/失败状态、超时、跨站限制、敏感字段过滤、向导跳过持久化与旧偏好兼容检查。配置已加载的单元测试使用夹具，不代表真实模型密钥验证。
 - 最终 tgz 与 Windows 包已在 `.local/user-journey-v041/appdata/TemperatureEmotionBox` 的独立官方 dsh 中升级并启动；浏览器确认首次自动弹出、三步导航、无可选模型的准确提示、稍后配置后刷新不再弹出、面板按钮重新打开，以及桌面实际布局。未配置 API Key，未发送模型请求。
 - 升级后仍显示个人测试偏好 23–26°C；COM3 FTDI 自动接入真实 DS18B20 帧，页面当时显示约 22.7°C，未做参考温度计校准。向导测试未修改用户正式数据或重写硬件固件。
+- 实现提交 `39e03af433c083a5e9f7789a7fc8f3d804ccabeb` 已推送并发布 v0.4.2；Windows CI [45783736902](https://github.com/bealuxDream/temperature-emotion-box/actions/runs/45783736902) 与 Pages [45783736817](https://github.com/bealuxDream/temperature-emotion-box/actions/runs/45783736817) 均成功，线上 HTML 已指向新 ZIP。
+- 通过 `gh release download` 重新下载公开 Windows ZIP、标准插件和 SHA256SUMS，哈希比对一致。ZIP SHA-256 为 `38cf858decdfa30eb106fea38ad60152796e90d8c6de0ba4b921069a20d5c5e6`；tgz 为 `f4c0786636bae9a017ed021a6a67825dba018dfa664d7f2e3f4ea7122f330a55`。本轮隔离服务已停止。
