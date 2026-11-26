@@ -188,6 +188,54 @@ $('settings-form').addEventListener('submit', async (event) => {
   } finally { saving = false; saveButton.disabled = editedFields.size === 0; }
 });
 
+
+let lastDiagnostics=null,diagnosticsBusy=false;
+function fillPortOptions(ports){
+  for(const id of ['serial-port','setup-serial']){
+    const element=$(id);
+    const value=id==='serial-port'&&editedFields.has(id)?element.value:(activeSettings.serialPort ?? 'auto');
+    const options=[{value:'auto',label:'自动识别 USB 设备'},{value:'',label:'仅使用 HTTP 上报'},...ports.map(p=>({value:p.path,label:p.path+(p.manufacturer?' · '+p.manufacturer:'')+(p.recommended?' · USB设备':'')}))];
+    if(value&&value!=='auto'&&!options.some(p=>p.value===value))options.push({value,label:value+' · 当前未连接'});
+    if(element.dataset.options!==JSON.stringify(options)){
+      element.replaceChildren(...options.map(p=>{const option=document.createElement('option');option.value=p.value;option.textContent=p.label;return option;}));
+      element.dataset.options=JSON.stringify(options);
+    }
+    element.value=value;
+  }
+}
+async function refreshDiagnostics(){
+  if(diagnosticsBusy)return;diagnosticsBusy=true;
+  try{
+    const response=await fetch('/api/v1/diagnostics',{signal:AbortSignal.timeout(3000)});
+    if(!response.ok)throw new Error('诊断服务未连接');
+    const data=await response.json();lastDiagnostics=data;
+    fillPortOptions(data.ports);
+    $('connection-help').textContent=data.message;
+    $('connection-action').textContent=data.action+(data.serial.error?' 错误代码：'+data.serial.error:'')+(data.serial.ignoredLines?' 已忽略非测温输出 '+data.serial.ignoredLines+' 行。':'');
+    $('sensor-step').textContent=data.checklist.sensor?'已收到有效的真实温度。':data.message;
+    $('comfort-step').textContent=activeSettings.comfortIsPersonalized?'已保存个人舒适温度。':'请填写理想温度或范围，也可以稍后设置。';
+    $('query-step').textContent=data.checklist.temperatureToolUsed?'温度查询工具已被调用（'+new Date(data.last_tool_query_at).toLocaleTimeString('zh-CN')+'），请核对聊天中的结果。':'在聊天中问“现在真实温度是多少？”，确认工具返回读数。';
+    for(const [id,valid] of [['check-sensor',data.checklist.sensor],['check-comfort',activeSettings.comfortIsPersonalized],['check-query',data.checklist.temperatureToolUsed]])$(id).classList.toggle('done',valid);
+    $('ready-state').textContent=data.checklist.sensor&&activeSettings.comfortIsPersonalized&&data.checklist.temperatureToolUsed?'已完成连接与查询检查':'继续完成首次设置';
+    $('serial-pause').textContent=data.serial.paused?'恢复采集':'暂停采集';
+  }catch(error){$('connection-help').textContent='连接诊断暂时不可用，请确认温度服务正在运行。';}
+  finally{diagnosticsBusy=false;}
+}
+$('setup-serial').addEventListener('change',async()=>{
+  try{setFields(await saveSettings({serialPort:$('setup-serial').value}));await refreshDiagnostics();}
+  catch(error){$('connection-help').textContent=error.message;}
+});
+$('refresh-ports').addEventListener('click',()=>void refreshDiagnostics());
+$('serial-pause').addEventListener('click',async()=>{
+  try{
+    const response=await fetch('/api/v1/serial-control',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:lastDiagnostics?.serial.paused?'resume':'pause'})});
+    if(!response.ok)throw new Error('操作失败，请重试。');
+    await refreshDiagnostics();
+  }catch(error){$('connection-help').textContent=error.message;}
+});
+void refreshDiagnostics();
+setInterval(()=>{if(!document.hidden)void refreshDiagnostics();},2500);
+
 await Promise.all([poll(), loadSettings()]);
 setInterval(poll, 1000);
 setInterval(async () => {

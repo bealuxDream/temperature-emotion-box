@@ -8,6 +8,7 @@ import { SerialPort } from 'serialport';
 import { attachSerialBridge } from './serial.mjs';
 import { InputError, TemperatureStore } from './temperature.mjs';
 import { DEFAULT_SETTINGS, SettingsStore } from './settings.mjs';
+import { chooseSerialPort, describeDiagnostics } from './diagnostics.mjs';
 
 const loopback = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
 const pageFiles = new Map(Object.entries({
@@ -15,7 +16,12 @@ const pageFiles = new Map(Object.entries({
   '/app.js': ['app.js', 'text/javascript'],
   '/style.css': ['style.css', 'text/css'],
   '/settings.css': ['settings.css', 'text/css'],
-  '/settings.css': ['settings.css', 'text/css'],
+  '/flash/': ['flash/index.html', 'text/html'],
+  '/flash/app.js': ['flash/app.js', 'text/javascript'],
+  '/flash/style.css': ['flash/style.css', 'text/css'],
+  '/flash/manifest.json': ['flash/manifest.json', 'application/json'],
+  '/flash/firmware.bin': ['flash/firmware.bin', 'application/octet-stream'],
+  '/flash/THIRD-PARTY.txt': ['flash/THIRD-PARTY.txt', 'text/plain'],
 }));
 const pageDir = new URL('./dashboard/', import.meta.url);
 
@@ -45,7 +51,7 @@ function isLocalOrigin(req) {
 
 export function createServer({ token, deviceId = 'box-01', staleAfterMs = 10000, now,
   settingsStore = null, getChatUrl = () => 'http://127.0.0.1:3080/', onSettingsUpdated = async () => {},
-  listPorts = () => SerialPort.list() } = {}) {
+  listPorts = () => SerialPort.list(), getDiagnostics = async () => null, onSerialControl = async () => {} } = {}) {
   const store = new TemperatureStore({ deviceId, staleAfterMs, now });
   const expected = token && token.length >= 32 ? Buffer.from(`Bearer ${token}`) : null;
   const server = http.createServer(async (req, res) => {
@@ -74,6 +80,18 @@ export function createServer({ token, deviceId = 'box-01', staleAfterMs = 10000,
         const frame = await bodyJson(req, 4096);
         return json(200, store.ingest(frame));
       }
+      if (req.method === 'GET' && path === '/api/v1/diagnostics') {
+        if (!isLocalOrigin(req)) return json(403, { error: 'Diagnostics are local only' });
+        return json(200, await getDiagnostics());
+      }
+      if (req.method === 'POST' && path === '/api/v1/serial-control') {
+        if (!isLocalOrigin(req)) return json(403, { error: 'Serial control is local only' });
+        if (!(req.headers['content-type'] ?? '').startsWith('application/json')) return json(415, { error: 'Expected application/json' });
+        const { action } = await bodyJson(req);
+        if (!['pause','resume'].includes(action)) return json(400, { error: 'Invalid serial action' });
+        await onSerialControl(action);
+        return json(200, { ok:true });
+      }
       if (req.method === 'GET' && path === '/api/v1/temperature') return json(200, store.snapshot());
       if (req.method === 'GET' && path === '/api/v1/history') return json(200, { readings: store.history });
       if (req.method === 'GET' && path === '/api/v1/settings') {
@@ -96,7 +114,7 @@ export function createServer({ token, deviceId = 'box-01', staleAfterMs = 10000,
           path: portPath, manufacturer: manufacturer ?? '', vendor_id: vendorId ?? '', product_id: productId ?? '',
         })) });
       }
-      if (req.method === 'GET' && path === '/health') return json(200, { ok: true, service: 'temperature-emotion-box', sensor_status: store.snapshot().status });
+      if (req.method === 'GET' && path === '/health') return json(200, { ok: true, service: 'temperature-emotion-box', version: '0.4.0', sensor_status: store.snapshot().status });
       if (req.method === 'GET' && pageFiles.has(path)) {
         const [file, type] = pageFiles.get(path);
         res.writeHead(200, { 'Content-Type': `${type}; charset=utf-8`, 'Cache-Control': 'no-cache',
@@ -117,9 +135,7 @@ export function createServer({ token, deviceId = 'box-01', staleAfterMs = 10000,
 }
 
 export async function resolveSerialPort(configuredPort, listPorts = () => SerialPort.list()) {
-  if (configuredPort !== 'auto') return configuredPort;
-  const ports = await listPorts();
-  return ports.length === 1 ? ports[0].path : '';
+  return chooseSerialPort(configuredPort, await listPorts());
 }
 
 function openLocalBrowser(url, spawnProcess = spawn) {
@@ -138,7 +154,7 @@ function openLocalBrowser(url, spawnProcess = spawn) {
   });
 }
 
-export async function createTemperatureRuntime(config = {}, { spawnProcess = spawn, listPorts = () => SerialPort.list() } = {}) {
+export async function createTemperatureRuntime(config = {}, { spawnProcess = spawn, listPorts = () => SerialPort.list(), serialBridgeFactory = attachSerialBridge } = {}) {
   const host = config.host ?? '127.0.0.1';
   const port = Number(config.port ?? 0);
   const deviceId = config.deviceId ?? 'box-01';
@@ -158,8 +174,13 @@ export async function createTemperatureRuntime(config = {}, { spawnProcess = spa
   });
   await settingsStore.load();
   let connectSerial = async () => {};
+  let controlSerial = async () => {};
+  let lastToolQueryAt = null;
+  const transport = { paused:false, connected:false, selectedPort:'', error:'', validFrames:0, ignoredLines:0, lastFrameAt:null };
+  const diagnostics = async () => describeDiagnostics({ reading:store.snapshot(), settings:settingsStore.read(), ports:await listPorts(), transport:{...transport}, lastToolQueryAt });
   const { server, store } = createServer({ token: config.deviceToken, deviceId, staleAfterMs,
     settingsStore, listPorts, getChatUrl: config.getChatUrl,
+    getDiagnostics:diagnostics, onSerialControl:(action) => controlSerial(action),
     onSettingsUpdated: (settings) => connectSerial(settings.serialPort) });
 
   let serialBridge;
@@ -168,21 +189,27 @@ export async function createTemperatureRuntime(config = {}, { spawnProcess = spa
   let closed = false;
   const selectSerial = async (requested) => {
     if (closed) return;
-    const selected = await resolveSerialPort(requested, listPorts);
+    const selected = transport.paused ? '' : await resolveSerialPort(requested, listPorts);
     if (serialBridge && activeSerialPort === selected) return;
     if (serialBridge) await new Promise((resolve) => serialBridge.close(resolve));
     serialBridge = undefined;
     if (activeSerialPort && activeSerialPort !== selected) store.resetCurrent();
     activeSerialPort = selected;
+    Object.assign(transport,{selectedPort:selected,connected:false,error:''});
     if (!selected) return;
     let lastError = '';
-    serialBridge = attachSerialBridge({ path: selected, baudRate, store,
+    serialBridge = serialBridgeFactory({ path: selected, baudRate, store,
+      onLine({ valid }) { if (valid) { transport.validFrames++; transport.lastFrameAt = new Date().toISOString(); } else transport.ignoredLines++; },
       onReading(reading) {
+        if (reading.kind === 'closed') { transport.connected=false; return; }
         if (reading.kind !== 'connected') return;
+        transport.connected=true; transport.error='';
         lastError = '';
         console.log(`[temperature-emotion-box] 串口已连接 ${reading.path}`);
       },
       onError(error) {
+        transport.connected=false;
+        transport.error=error.code ?? 'SERIAL_ERROR';
         if (error.message !== lastError) console.warn(`[temperature-emotion-box] ${selected}: ${error.message}`);
         lastError = error.message;
       },
@@ -193,15 +220,27 @@ export async function createTemperatureRuntime(config = {}, { spawnProcess = spa
     serialQueue = operation.catch((error) => console.warn(`[temperature-emotion-box] ${error.message}`));
     return serialQueue;
   };
-  const address = await new Promise((resolve, reject) => {
-    server.once('error', reject);
-    server.listen(port, host, () => { server.removeListener('error', reject); resolve(server.address()); });
+  controlSerial = async (action) => {
+    transport.paused = action === 'pause';
+    await connectSerial(settingsStore.read().serialPort);
+    if (transport.paused) store.resetCurrent();
+  };
+  const listen = (target) => new Promise((resolve,reject) => {
+    server.once('error',reject);
+    server.listen(target,host,() => { server.removeListener('error',reject); resolve(server.address()); });
   });
+  let address;
+  try { address=await listen(port); }
+  catch(error) {
+    if (error.code !== 'EADDRINUSE' || port === 0) throw error;
+    console.warn(`[temperature-emotion-box] Port ${port} occupied; choosing an available local port.`);
+    address=await listen(0);
+  }
   const dashboardUrl = `http://127.0.0.1:${address.port}/`;
   const initial = settingsStore.read();
   await connectSerial(initial.serialPort);
   const discovery = setInterval(() => {
-    if (!activeSerialPort && settingsStore.read().serialPort === 'auto') void connectSerial('auto');
+    if (!transport.paused && settingsStore.read().serialPort === 'auto') void connectSerial('auto');
   }, 3000);
   discovery.unref();
 
@@ -215,7 +254,8 @@ export async function createTemperatureRuntime(config = {}, { spawnProcess = spa
 
   return {
     server, store, settings: settingsStore, dashboardUrl,
-    reading: () => store.snapshot(),
+    reading: () => store.snapshot(), diagnostics,
+    recordToolQuery: () => { lastToolQueryAt = new Date().toISOString(); },
     updateSettings: async (patch) => {
       const previousPort = settingsStore.read().serialPort;
       const settings = await settingsStore.update(patch);

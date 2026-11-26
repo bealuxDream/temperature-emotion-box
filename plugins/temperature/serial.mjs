@@ -14,7 +14,7 @@ export function consumeSerialLine(line, store) {
   }
 }
 
-export function attachSerialBridge({ path, baudRate = 115200, store, onReading, onError, serialPortClass = SerialPort }) {
+export function attachSerialBridge({ path, baudRate = 115200, store, onReading, onError, onLine, serialPortClass = SerialPort }) {
   if (typeof path !== 'string' || !/^(COM\d+|\/dev\/tty[A-Za-z0-9._/-]+)$/.test(path)) {
     throw new Error('SERIAL_PORT must be a COM port such as COM3 or a /dev/tty* device');
   }
@@ -23,6 +23,21 @@ export function attachSerialBridge({ path, baudRate = 115200, store, onReading, 
   let retryTimer;
   let parser;
   let port;
+  let opening = false;
+  let closing = false;
+  const closeCallbacks = [];
+  const finishClose = () => {
+    if (opening || closing) return;
+    if (port?.isOpen) {
+      closing = true;
+      port.close((error) => {
+        closing = false;
+        for (const callback of closeCallbacks.splice(0)) callback(error);
+      });
+    } else {
+      for (const callback of closeCallbacks.splice(0)) callback();
+    }
+  };
 
   const scheduleOpen = () => {
     if (disposed || retryTimer) return;
@@ -36,16 +51,22 @@ export function attachSerialBridge({ path, baudRate = 115200, store, onReading, 
     port = new serialPortClass({ path, baudRate, autoOpen: false });
     parser = port.pipe(new ReadlineParser({ delimiter: '\n', includeDelimiter: false }));
     parser.on('data', (line) => {
+      if (disposed) return;
       const reading = consumeSerialLine(String(line).replace(/\r$/, ''), store);
+      onLine?.({ valid:Boolean(reading) });
       if (reading) onReading?.(reading);
     });
-    port.on('open', () => onReading?.({ kind: 'connected', path, baudRate }));
+    port.on('open', () => { if (!disposed) onReading?.({ kind: 'connected', path, baudRate }); });
     port.on('error', (error) => {
+      if (disposed) return;
       onError?.(error);
       scheduleOpen();
     });
-    port.on('close', () => scheduleOpen());
+    port.on('close', () => { if (!disposed) onReading?.({kind:'closed',path}); scheduleOpen(); });
+    opening = true;
     port.open((error) => {
+      opening = false;
+      if (disposed) { finishClose(); return; }
       if (error) {
         onError?.(error);
         try { port.destroy(); } catch { /* retry the next open interval */ }
@@ -60,8 +81,8 @@ export function attachSerialBridge({ path, baudRate = 115200, store, onReading, 
       disposed = true;
       clearTimeout(retryTimer);
       parser?.destroy();
-      if (port?.isOpen) port.close(callback ?? (() => {}));
-      else callback?.();
+      if (callback) closeCallbacks.push(callback);
+      finishClose();
     },
   };
 }

@@ -10,9 +10,12 @@
     "dev": "node scripts/dev.mjs",
     "plugin:install": "npm run plugin:pack && node scripts/install-plugin.mjs",
     "firmware:build": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-firmware.ps1",
-    "plugin:pack": "npm pack ./plugins/temperature --pack-destination .local",
+    "plugin:pack": "node scripts/pack-plugin.mjs",
     "test": "node --test tests/*.test.mjs",
-    "dsh": "node scripts/run-dsh.mjs"
+    "dsh": "node scripts/run-dsh.mjs",
+    "firmware:public": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-public-firmware.ps1",
+    "flasher:build": "node scripts/build-flasher.mjs",
+    "release:windows": "node scripts/build-windows-release.mjs"
   },
   "dependencies": {
     "@deepseek-ai/cordis": "4.1.0",
@@ -25,6 +28,8 @@
     "serialport": "^13.0.0"
   },
   "devDependencies": {
-    "@deepseek-ai/dsh-tool-executor-native": "0.2.2-rc.1"
+    "@deepseek-ai/dsh-tool-executor-native": "0.2.2-rc.1",
+    "esbuild": "0.28.2",
+    "esptool-js": "0.7.1"
   }
 }

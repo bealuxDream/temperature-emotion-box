@@ -11,14 +11,29 @@ ESP32-S3 + DS18B20 实时测温，以 **DeepSeek 官方 Harness（dsh）** 作�
 - 插件自带中文网页，显示实时温度、最近 300 帧曲线、冷热表情和聊天设置。
 - 无设备时显示等待；失联超过 10 秒不再返回旧温度；传感器断开明确报告。
 - DeepSeek API Key 保存在 dsh 本地配置，不写入 ESP32 或 Git。
-- 本版没有实体屏幕驱动；开发板具体型号和实际接线仍需上板确认。
+- 本版没有实体屏幕驱动；公开固件面向 ESP32-S3 DevKitC-1-N8，其他板型需要独立验证。
 
+## Windows 新手安装（推荐）
+
+从 [Releases](https://github.com/bealuxDream/temperature-emotion-box/releases/latest) 下载 temperature-emotion-box-windows-v0.4.0.zip，解压后双击 Start.cmd。第一次联网自动下载独立 Node 24.11.1、pnpm 和官方 dsh；之后双击即可打开，双击 Stop.cmd 停止。无需手动安装 Python、PlatformIO 或全局 Node，也不更改已有 dsh 环境。
+
+打开面板后跟随四步向导：连接设备 → 设置舒适区 → dsh 原生 API Key 引导 → 询问真实温度。未刷固件时可使用 [浏览器刷写页](https://bealuxdream.github.io/temperature-emotion-box/flash/) 或面板内入口；只适配 ESP32-S3 DevKitC-1-N8（8MB Flash、无PSRAM）兼容板。刷写需在 Edge/Chrome 手动选择设备、确认覆盖原程序。
+
+第一次需联网访问 nodejs.org、npm、GitHub，不是离线包；API Key、硬件和舒适偏好仍需用户提供。新双通道固件已编译，实板验收状态见 [检查点](docs/checkpoint.md)。不要把软件测试等同于所有硬件即插即用。
+
+详见 [Windows 新手指南](docs/windows-quickstart.md)。独立数据位于 %LOCALAPPDATA%/TemperatureEmotionBox，含聊天与密钥，不要上传或外发。端口冲突会自动换端口，请通过 Start.cmd 打开实际面板地址。
+
+已有官方 dsh 0.2.2-rc.1 的用户可只安装下面的标准插件。手动安装 dsh 需要 Node >=24.9 和 pnpm：
+
+~~~powershell
+npm install -g pnpm@10.25.0 @deepseek-ai/dsh@0.2.2-rc.1
+~~~
 ## 安装与使用
 
-先到 [GitHub Releases](https://github.com/bealuxDream/temperature-emotion-box/releases/latest) 下载插件安装包。如果已有 DeepSeek Harness Web 0.2.2-rc.1，把 `dsh-temperature-emotion-box-0.3.0.tgz` 安装到 `web` profile。安装后启动 dsh，打开 [温度表情箱](http://127.0.0.1:8787/)。
+先到 [GitHub Releases](https://github.com/bealuxDream/temperature-emotion-box/releases/latest) 下载插件安装包。如果已有 DeepSeek Harness Web 0.2.2-rc.1，把 `dsh-temperature-emotion-box-0.4.0.tgz` 安装到 `web` profile。安装后启动 dsh，打开 [温度表情箱](http://127.0.0.1:8787/)。
 
 ```powershell
-dsh plugin --profile web add "C:\path\to\dsh-temperature-emotion-box-0.3.0.tgz"
+dsh plugin --profile web add "C:\path\to\dsh-temperature-emotion-box-0.4.0.tgz"
 dsh web
 ```
 
@@ -36,7 +51,9 @@ npm run dev
 - 表情面板：<http://127.0.0.1:8787>
 - 官方 dsh 聊天：<http://127.0.0.1:8787/chat>
 
-点击表情面板右上角“打开 DeepSeek 聊天”，自动携带本次启动的本地访问令牌；直接打开没有令牌的 3080 地址可能返回 401。进入 dsh 的 **Settings → Models** 填写自己的 DeepSeek API Key，然后 **Choose workspace** 选择本项目。密钥请直接填本机界面。项目专用 dsh 用户目录是 `.local/dsh/`，不影响已有 dsh 安装。
+以上为默认地址；端口冲突时使用启动日志中的实际 URL，Windows 新手包由 Start.cmd 自动打开。
+
+点击表情面板右上角“打开 DeepSeek 聊天”，自动携带本次启动的本地访问令牌；直接打开没有令牌的 3080 地址可能返回 401。进入 dsh 的 **Settings → Models** 填写自己的 DeepSeek API Key，然后选择默认工作区或自己创建的本地工作区；安装独立插件不要求克隆本项目。密钥请直接填本机界面。项目专用 dsh 用户目录是 `.local/dsh/`，不影响已有 dsh 安装。
 
 询问“现在温度是多少？”可触发查询工具。普通聊天的系统提示词会加入当次有效的实测温度，失联或过期时加入“目前无法获取到温度”。在面板「温度与聊天设置」可编辑这两段提示词、冷热情绪和 AI 自称。实测温度会持续影响回复长短与语气。日常聊天每轮有 17% 的机会顺带提及一句室温或冷暖，直接询问时照常查询。
 
@@ -54,9 +71,9 @@ npm run firmware:build
 npm run firmware:build -- -UploadPort COM3
 ```
 
-一个串口时插件会自动连接。多个串口时在面板选择 ESP32 对应的端口。本机已验证 COM3、115200 baud。烧录前先退出占用串口的 dsh。通过 Wi-Fi 上报时，可在 dsh profile 的 `temperature-emotion-box-runtime` 配置行设置监听地址和设备 Token，并将面板串口选为「仅使用 HTTP 上报」。
+只有一个可识别的 USB 串口适配器时插件会自动连接；多个或无法识别时在面板手动选择。历史实板已验证 COM3、115200 baud。浏览器刷写前在面板暂停采集，刷写后断开浏览器串口并恢复采集。通过 Wi-Fi 上报时，可在 dsh profile 的 `temperature-emotion-box-runtime` 配置行设置监听地址和设备 Token，并将面板串口选为「仅使用 HTTP 上报」。
 
-Windows 下旧版 Xtensa 工具链无法直接处理此项目的中文父路径。`npm run firmware:build` 临时把本项目映射到一个空闲 ASCII 盘符，编译后解除映射；工具链缓存在项目 `.local/platformio/`。手动上传也应在同样的 ASCII 路径环境下进行，并确认开发板型号和串口。当前已安装开发工具，后续通常直接执行构建命令即可。
+Windows 下旧版 Xtensa 工具链无法直接处理此项目的中文父路径。`npm run firmware:build` 临时把本项目映射到一个空闲 ASCII 盘符，编译后解除映射；工具链缓存在项目 `.local/platformio/`。手动上传也应在同样的 ASCII 路径环境下进行，并确认开发板型号和串口。开发工具在每台新电脑都需要安装，不能复用维护者本机已安装的状态。
 
 ## 项目结构
 
@@ -81,7 +98,7 @@ git status
 
 ## 开源与宣传页
 
-项目以 MIT 协议开源：[GitHub 仓库](https://github.com/bealuxDream/temperature-emotion-box)。依赖、密钥、Wi-Fi 配置、dsh 会话数据与编译产物均已忽略。
+项目以 MIT 协议开源：[GitHub 仓库](https://github.com/bealuxDream/temperature-emotion-box)。依赖、密钥、Wi-Fi 配置、dsh 会话数据与私有构建目录均已忽略；网页刷写所需的无凭证公开固件随插件和静态站点发布。
 
 静态宣传页源文件在 site/，通过 GitHub Pages 发布；main 分支更新页面文件时，GitHub Actions 自动部署。宣传页的滑块仅为明确标注的交互示例，不显示实测读数。真实传感器状态、温度曲线和设置保存在插件附带的本机面板中。
 

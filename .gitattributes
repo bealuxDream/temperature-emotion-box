@@ -3,3 +3,6 @@
 *.cpp text eol=lf
 *.h text eol=lf
 *.yml text eol=lf
+*.js text eol=lf
+*.html text eol=lf
+*.css text eol=lf

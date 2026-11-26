@@ -1,4 +1,4 @@
-param([string]$UploadPort)
+param([string]$UploadPort, [string]$Environment = 'esp32-s3-devkitc-1')
 
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
@@ -23,7 +23,7 @@ try {
     if (-not $mappedDrive) { throw 'No free drive letter for the firmware toolchain.' }
     $env:PLATFORMIO_CORE_DIR = "${mappedDrive}\.local\platformio"
     Set-Location "${mappedDrive}\"
-    $pioArgs = @('-m', 'platformio', 'run', '-d', "${mappedDrive}\firmware")
+    $pioArgs = @('-m', 'platformio', 'run', '-d', "${mappedDrive}\firmware", '-e', $Environment)
     if ($UploadPort) { $pioArgs += @('-t', 'upload', '--upload-port', $UploadPort) }
     & "${mappedDrive}\.local\pio-venv\Scripts\python.exe" @pioArgs
     $buildExit = $LASTEXITCODE

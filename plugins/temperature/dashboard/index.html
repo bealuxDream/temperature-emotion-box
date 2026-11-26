@@ -7,6 +7,13 @@
 <main>
   <div class="eyebrow"><span class="dot"></span> A LITTLE COMPANY, IN EVERY DEGREE</div>
   <section class="intro"><h1>感知此刻的温度，<br>多一点<span>恰好的关心。</span></h1><p>让房间的冷暖，成为对话的一部分。</p></section>
+  <section class="card onboarding" aria-labelledby="onboarding-title">
+    <div class="settings-heading"><div><h2 id="onboarding-title">四步开始，让关心接上真实温度</h2><p>按顺序完成；绿色状态只代表实际检查通过的步骤。</p></div><span id="ready-state" class="settings-state">正在检查</span></div>
+    <ol class="setup-checklist"><li id="check-sensor"><strong>1 · 连接开发板</strong><span id="sensor-step">插入数据 USB 线，选择设备。</span></li><li id="check-comfort"><strong>2 · 设置舒适区</strong><span id="comfort-step">由你填写理想温度或范围，也可以稍后设置。</span></li><li><strong>3 · 配置聊天</strong><span>打开 DeepSeek 聊天，按官方中文引导填写 API Key；已经配置过可跳过。</span></li><li id="check-query"><strong>4 · 试着问一次</strong><span id="query-step">在聊天中问“现在真实温度是多少？”，确认工具返回读数。</span></li></ol>
+    <div class="setup-connection"><label class="field">开发板串口<select id="setup-serial"><option value="auto">自动识别 USB 设备</option><option value="">仅使用 HTTP 上报</option></select></label><button type="button" id="refresh-ports" class="save-button">重新检查</button><button type="button" id="serial-pause" class="skip-button">暂停采集</button></div>
+    <p id="connection-help" role="status" aria-live="polite">正在读取连接诊断…</p><p id="connection-action" class="field-help"></p>
+    <div class="setup-links"><a href="/flash/" target="_blank" rel="noreferrer">首次使用？刷写配套固件 ↗</a><a href="/chat" target="_blank" rel="noreferrer">打开 DeepSeek 聊天 ↗</a><a href="#comfort-setup-title">填写舒适温度 ↓</a></div>
+  </section>
   <section id="comfort-setup" class="card comfort-setup" aria-labelledby="comfort-setup-title" hidden>
     <div class="comfort-setup-copy">
       <h2 id="comfort-setup-title">首次设置 · 你喜欢多少度？</h2>

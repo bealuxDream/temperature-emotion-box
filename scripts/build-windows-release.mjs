@@ -1,0 +1,24 @@
+import {mkdir,copyFile,readFile,writeFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {spawnSync} from 'node:child_process';
+import {resolve} from 'node:path';
+const pkg=JSON.parse(await readFile('plugins/temperature/package.json','utf8'));
+const name='temperature-emotion-box-windows-v'+pkg.version;
+const dir=resolve('.local/release',name);
+await mkdir(dir,{recursive:true});
+for(const file of ['Start.cmd','Stop.cmd','launcher.ps1','runner.mjs'])await copyFile('windows/'+file,dir+'/'+file);
+// Windows PowerShell 5.1 requires a BOM to decode the Chinese GUI strings.
+const launcher=(await readFile(dir+'/launcher.ps1','utf8')).replace(/^\uFEFF/,'');
+await writeFile(dir+'/launcher.ps1','\uFEFF'+launcher);
+const pluginFile=pkg.name+'-'+pkg.version+'.tgz';
+await copyFile('.local/'+pluginFile,dir+'/'+pluginFile);
+const bytes=await readFile(dir+'/'+pluginFile);
+await writeFile(dir+'/manifest.json',JSON.stringify({version:pkg.version,pluginFile,pluginSha256:createHash('sha256').update(bytes).digest('hex')},null,2)+'\n');
+await copyFile('docs/windows-quickstart.md',dir+'/先读我.md');
+await copyFile('LICENSE',dir+'/LICENSE');
+const zip=resolve('.local/release',name+'.zip');
+const escape=s=>"'"+s.replaceAll("'","''")+"'";
+const command='Compress-Archive -Path '+escape(dir+'/*')+' -DestinationPath '+escape(zip)+' -Force';
+const result=spawnSync('powershell.exe',['-NoProfile','-Command',command],{stdio:'inherit',windowsHide:true});
+if(result.status!==0)throw new Error('Windows ZIP creation failed');
+console.log(zip);

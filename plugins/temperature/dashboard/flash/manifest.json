@@ -1,0 +1,14 @@
+{
+  "version": "0.4.0",
+  "chip": "ESP32-S3",
+  "board": "esp32-s3-devkitc-1",
+  "minFlashMB": 8,
+  "dqPin": 16,
+  "transport": [
+    "uart0",
+    "native-usb"
+  ],
+  "size": 954192,
+  "sha256": "c6961e4121e5c5ee33b026d94f845f9945b7c80bdabb25a9490de657058b2b39",
+  "md5": "e7b049c774c809d3d80182ab688586dd"
+}

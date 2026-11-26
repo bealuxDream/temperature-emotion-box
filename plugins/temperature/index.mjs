@@ -28,6 +28,7 @@ export function apply(ctx) {
       render: (_args, value) => [{ type: 'text', text: value }],
     },
     async execute() {
+      runtime.recordToolQuery?.();
       const reading = runtime.reading();
       const explanation = reading.status === 'ok' ? 'DS18B20 测得的探头周围温度。' : '目前无法获取到温度';
       return JSON.stringify({ ...reading, explanation });

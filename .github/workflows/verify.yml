@@ -1,0 +1,19 @@
+name: Verify plugin and public assets
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.11.1
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm test
+      - run: node scripts/verify-public-assets.mjs

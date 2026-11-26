@@ -5,7 +5,7 @@
 #include <DallasTemperature.h>
 #include <ArduinoJson.h>
 #include <esp_system.h>
-#include "secrets.h"
+#include "defaults.h"
 
 // GPIO16: 3.3 V external power; 4.7 kOhm pull-up from DQ to 3.3 V.
 OneWire oneWire(ONE_WIRE_PIN);
@@ -32,7 +32,10 @@ void publish(float temperature, const char* status, uint32_t sampledAt) {
   else frame["temperature_c"] = nullptr;
   String body;
   serializeJson(frame, body);
-  Serial0.println(body); // Route JSON to the FTDI bridge on UART0 (COM3).
+  Serial0.println(body); // USB-UART bridge on UART0.
+#if ARDUINO_USB_CDC_ON_BOOT
+  Serial.println(body);  // Native USB CDC / USB Serial-JTAG on supported ESP32-S3 boards.
+#endif
   if (WiFi.status() != WL_CONNECTED) return;
   HTTPClient http;
   http.setConnectTimeout(1500);
@@ -47,22 +50,27 @@ void publish(float temperature, const char* status, uint32_t sampledAt) {
 
 void setup() {
   Serial0.begin(115200);
+#if ARDUINO_USB_CDC_ON_BOOT
+  Serial.begin(115200);
+#endif
   delay(150);
   char id[32];
   snprintf(id, sizeof(id), "%08lx-%08lx", static_cast<unsigned long>(esp_random()), static_cast<unsigned long>(esp_random()));
   bootId = id;
   sensor.begin();
   sensor.setWaitForConversion(false);
-  WiFi.mode(WIFI_STA);
-  WiFi.setAutoReconnect(true);
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  if (strlen(WIFI_SSID) && strcmp(WIFI_SSID,"YOUR_WIFI_SSID") != 0) {
+    WiFi.mode(WIFI_STA);
+    WiFi.setAutoReconnect(true);
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  } else { WiFi.mode(WIFI_OFF); }
   lastWifiAttempt = millis();
-  Serial0.println("temperature-emotion-box firmware 0.1.0 / protocol 1");
+  Serial0.println("temperature-emotion-box firmware 0.4.0 / protocol 1");
 }
 
 void loop() {
   const uint32_t now = millis();
-  if (WiFi.status() != WL_CONNECTED && static_cast<uint32_t>(now - lastWifiAttempt) >= 15000) {
+  if (strlen(WIFI_SSID) && strcmp(WIFI_SSID,"YOUR_WIFI_SSID") != 0 && WiFi.status() != WL_CONNECTED && static_cast<uint32_t>(now - lastWifiAttempt) >= 15000) {
     lastWifiAttempt = now;
     WiFi.disconnect();
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
