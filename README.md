@@ -15,11 +15,11 @@ ESP32-S3 + DS18B20 实时测温，以 **DeepSeek 官方 Harness（dsh）** 作�
 
 ## Windows 新手安装（推荐）
 
-从 [Releases](https://github.com/bealuxDream/temperature-emotion-box/releases/latest) 下载 temperature-emotion-box-windows-v0.4.1.zip，解压后双击 Start.cmd。第一次从国内 npmmirror 镜像下载独立 Node 24.11.1、pnpm 和官方 dsh；之后双击即可打开，双击 Stop.cmd 停止。无需手动安装 Python、PlatformIO 或全局 Node，也不更改已有 dsh 环境。
+从 [Releases](https://github.com/bealuxDream/temperature-emotion-box/releases/latest) 下载 temperature-emotion-box-windows-v0.4.2.zip，解压后双击 Start.cmd。第一次从国内 npmmirror 镜像下载独立 Node 24.11.1、pnpm 和官方 dsh；之后双击即可打开，双击 Stop.cmd 停止。无需手动安装 Python、PlatformIO 或全局 Node，也不更改已有 dsh 环境。
 
-打开面板后跟随四步向导：连接设备 → 设置舒适区 → dsh 原生 API Key 引导 → 询问真实温度。未刷固件时可使用 [浏览器刷写页](https://bealuxdream.github.io/temperature-emotion-box/flash/) 或面板内入口；只适配 ESP32-S3 DevKitC-1-N8（8MB Flash、无PSRAM）兼容板。刷写需在 Edge/Chrome 手动选择设备、确认覆盖原程序。
+首次没有可选模型时，面板自动弹出三步聊天配置向导，可跳过或随时重开。密钥直接填写在 dsh 原生模型设置中，面板只检测可选模型，不代表真实回复已验证。随后跟随四步检查：连接设备 → 设置舒适区 → dsh 原生 API Key 引导 → 询问真实温度。未刷固件时可使用 [浏览器刷写页](https://bealuxdream.github.io/temperature-emotion-box/flash/) 或面板内入口；只适配 ESP32-S3 DevKitC-1-N8（8MB Flash、无PSRAM）兼容板。刷写需在 Edge/Chrome 手动选择设备、确认覆盖原程序。
 
-安装器 v0.4.1 默认从 `npmmirror.com/mirrors/node/` 下载 Node，从 `registry.npmmirror.com` 下载 npm/pnpm 包及插件依赖；校验 Node 固定 SHA-256，不自动回退官方源。首次仍需联网，ZIP 和宣传页继续托管 GitHub。API Key、硬件和舒适偏好由使用者提供。插件及公开固件仍为 v0.4.0，实板验收状态见 [检查点](docs/checkpoint.md)。
+安装器 v0.4.2 默认从 `npmmirror.com/mirrors/node/` 下载 Node，从 `registry.npmmirror.com` 下载 npm/pnpm 包及插件依赖；校验 Node 固定 SHA-256，不自动回退官方源。首次仍需联网，ZIP 和宣传页继续托管 GitHub。API Key、硬件和舒适偏好由使用者提供。插件为 v0.4.2，公开固件仍为 v0.4.0，实板验收状态见 [检查点](docs/checkpoint.md)。
 
 详见 [Windows 新手指南](docs/windows-quickstart.md)。独立数据位于 %LOCALAPPDATA%/TemperatureEmotionBox，含聊天与密钥，不要上传或外发。端口冲突会自动换端口，请通过 Start.cmd 打开实际面板地址。
 
@@ -31,10 +31,10 @@ npm install -g pnpm@10.25.0 @deepseek-ai/dsh@0.2.2-rc.1 --registry=https://regis
 ~~~
 ## 安装与使用
 
-先到 [GitHub Releases](https://github.com/bealuxDream/temperature-emotion-box/releases/latest) 下载插件安装包。如果已有 DeepSeek Harness Web 0.2.2-rc.1，把 `dsh-temperature-emotion-box-0.4.0.tgz` 安装到 `web` profile。安装后启动 dsh，打开 [温度表情箱](http://127.0.0.1:8787/)。
+先到 [GitHub Releases](https://github.com/bealuxDream/temperature-emotion-box/releases/latest) 下载插件安装包。如果已有 DeepSeek Harness Web 0.2.2-rc.1，把 `dsh-temperature-emotion-box-0.4.2.tgz` 安装到 `web` profile。安装后启动 dsh，打开 [温度表情箱](http://127.0.0.1:8787/)。
 
 ```powershell
-dsh plugin --profile web add "C:\path\to\dsh-temperature-emotion-box-0.4.0.tgz" --registry=https://registry.npmmirror.com
+dsh plugin --profile web add "C:\path\to\dsh-temperature-emotion-box-0.4.2.tgz" --registry=https://registry.npmmirror.com
 dsh web
 ```
 

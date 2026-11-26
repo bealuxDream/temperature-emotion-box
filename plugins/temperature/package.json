@@ -1,6 +1,6 @@
 {
   "name": "dsh-temperature-emotion-box",
-  "version": "0.4.0",
+  "version": "0.4.2",
   "description": "Cute real-time ambient temperature companion and dashboard for DeepSeek Harness",
   "license": "MIT",
   "type": "module",
@@ -23,7 +23,8 @@
     "cordis.patch.yml",
     "README.md",
     "LICENSE",
-    "diagnostics.mjs"
+    "diagnostics.mjs",
+    "chat-setup.mjs"
   ],
   "engines": {
     "node": ">=24.9.0",

@@ -10,7 +10,8 @@ for(const file of files){
 }
 const manifest=JSON.parse(await readFile(directories[0]+'/manifest.json','utf8'));
 const image=await readFile(directories[0]+'/firmware.bin');
-assert.equal(manifest.version,pkg.version);
+assert.match(manifest.version,/^\d+\.\d+\.\d+$/);
+assert.equal(manifest.version,JSON.parse(await readFile(directories[1]+'/manifest.json','utf8')).version);
 assert.equal(manifest.size,image.length);
 assert.equal(manifest.sha256,createHash('sha256').update(image).digest('hex'));
 assert.equal(manifest.md5,createHash('md5').update(image).digest('hex'));

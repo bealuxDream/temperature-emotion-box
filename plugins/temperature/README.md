@@ -7,7 +7,7 @@ An installable DeepSeek Harness bundle that pairs an ESP32-S3 + DS18B20 with a l
 Install the supplied tarball in DeepSeek Harness Web 0.2.2-rc.1. Use the absolute path to the downloaded file.
 
 ```sh
-dsh plugin --profile web add "/path/to/dsh-temperature-emotion-box-0.4.0.tgz"
+dsh plugin --profile web add "/path/to/dsh-temperature-emotion-box-0.4.2.tgz"
 dsh web
 ```
 
@@ -41,3 +41,5 @@ The optional authenticated HTTP ingress can be configured on the DSH runtime plu
 No valid / fresh reading is injected as a number when the sensor disconnects or data expires; the configurable `unavailablePrompt` is injected instead. The default sensor validity window is 10 seconds.
 
 Version 0.4.0 includes a four-step setup checklist, actionable connection diagnostics, live port refresh, pause/resume for browser flashing, and automatic dashboard-port fallback. A Windows x64 beginner ZIP is available from the organization Releases. The public 8MB ESP32-S3 DevKitC-1-N8 firmware has no credentials; new dual-channel firmware still needs board-level acceptance.
+
+Version 0.4.2 adds an automatic three-step chat setup guide. API keys stay in the native DSH model settings; catalog availability never claims a successful AI reply.

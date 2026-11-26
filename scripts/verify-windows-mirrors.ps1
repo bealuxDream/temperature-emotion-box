@@ -1,5 +1,5 @@
 param(
-  [string]$PackageDirectory=(Join-Path $PSScriptRoot '../.local/release/temperature-emotion-box-windows-v0.4.1'),
+  [string]$PackageDirectory=(Join-Path $PSScriptRoot ('../.local/release/temperature-emotion-box-windows-v'+(Get-Content (Join-Path $PSScriptRoot '../windows/download-sources.json') -Raw|ConvertFrom-Json).version)),
   [string]$DataDirectory=(Join-Path $PSScriptRoot ('../.local/mirror-install-'+[Guid]::NewGuid().ToString('N')))
 )
 $ErrorActionPreference='Stop'

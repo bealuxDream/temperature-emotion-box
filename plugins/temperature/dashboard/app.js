@@ -16,6 +16,56 @@ const settingsFields = {
 const editedFields = new Set();
 let saving = false;
 let busy = false;
+let chatConfigured = false, wizardOffered = false, wizardStep = 0;
+const chatDialog = $('chat-setup-dialog');
+function showWizardStep(step) {
+  wizardStep=step;
+  document.querySelectorAll('[data-wizard-panel]').forEach(panel=>{panel.hidden=Number(panel.dataset.wizardPanel)!==step;});
+  document.querySelectorAll('[data-wizard-step]').forEach(button=>{
+    if(Number(button.dataset.wizardStep)===step)button.setAttribute('aria-current','step');
+    else button.removeAttribute('aria-current');
+  });
+  $('chat-setup-back').disabled=step===0;
+  $('chat-setup-next').textContent=step===2?'完成指引，返回面板':'下一步';
+  if(step===2)void refreshChatStatus();
+}
+function openChatWizard() { showWizardStep(chatConfigured?2:0); if(!chatDialog.open)chatDialog.showModal(); }
+async function dismissChatWizard() {
+  try {
+    setFields(await saveSettings({chatSetupDismissed:true}));
+    chatDialog.close();
+    $('open-chat-setup').focus();
+  } catch { $('chat-setup-message').textContent='暂时无法保存向导进度，请稍后重试。'; }
+}
+async function refreshChatStatus() {
+  $('check-chat-status').disabled=true;
+  try {
+    const response=await fetch('/api/v1/chat-status',{signal:AbortSignal.timeout(4000)});
+    if(!response.ok)throw new Error('Unavailable');
+    const data=await response.json();
+    chatConfigured=data.status==='configured';
+    const message=chatConfigured?`已检测到 ${data.modelCount} 个可选模型。请发起一次聊天验证密钥和回复。`
+      :data.status==='unconfigured'?'尚未检测到可选模型。请打开聊天 → 左下账号菜单 → 设置 → 模型，保存 API Key 后再检查。'
+      :'暂时无法确认模型配置。请到聊天页检查模型选择器，并按指引保存密钥。';
+    $('chat-setup-status').textContent=message;
+    $('chat-step').textContent=chatConfigured?'已检测到可选模型；真实回复待试聊验证。':data.status==='unconfigured'?'尚无可选模型，请打开聊天配置向导。':'模型配置待检查，可随时打开向导。';
+    $('check-chat').classList.toggle('done',chatConfigured);
+  } catch {
+    chatConfigured=false;
+    $('check-chat').classList.remove('done');
+    $('chat-step').textContent='模型配置待检查，请确认 dsh 正在运行。';
+    $('chat-setup-status').textContent='模型检查暂时不可用；请确认 dsh 正在运行，再点击重新检查。';
+  } finally { $('check-chat-status').disabled=false; }
+}
+$('open-chat-setup').addEventListener('click',openChatWizard);
+$('chat-setup-close').addEventListener('click',()=>void dismissChatWizard());
+$('chat-setup-later').addEventListener('click',()=>void dismissChatWizard());
+chatDialog.addEventListener('cancel',event=>{event.preventDefault();void dismissChatWizard();});
+$('chat-setup-back').addEventListener('click',()=>showWizardStep(Math.max(0,wizardStep-1)));
+$('chat-setup-next').addEventListener('click',()=>{if(wizardStep===2)void dismissChatWizard();else showWizardStep(wizardStep+1);});
+document.querySelectorAll('[data-wizard-step]').forEach(button=>button.addEventListener('click',()=>showWizardStep(Number(button.dataset.wizardStep))));
+$('check-chat-status').addEventListener('click',()=>void refreshChatStatus());
+window.addEventListener('focus',()=>void refreshChatStatus());
 function render(data) {
   const valid = data.status === 'ok' && Number.isFinite(data.temperature_c);
   $('status').textContent = statuses[data.status] ?? '状态未知';
@@ -213,10 +263,10 @@ async function refreshDiagnostics(){
     $('connection-help').textContent=data.message;
     $('connection-action').textContent=data.action+(data.serial.error?' 错误代码：'+data.serial.error:'')+(data.serial.ignoredLines?' 已忽略非测温输出 '+data.serial.ignoredLines+' 行。':'');
     $('sensor-step').textContent=data.checklist.sensor?'已收到有效的真实温度。':data.message;
-    $('comfort-step').textContent=activeSettings.comfortIsPersonalized?'已保存个人舒适温度。':'请填写理想温度或范围，也可以稍后设置。';
+    $('comfort-step').textContent=data.checklist.comfort?'已保存个人舒适温度。':'请填写理想温度或范围，也可以稍后设置。';
     $('query-step').textContent=data.checklist.temperatureToolUsed?'温度查询工具已被调用（'+new Date(data.last_tool_query_at).toLocaleTimeString('zh-CN')+'），请核对聊天中的结果。':'在聊天中问“现在真实温度是多少？”，确认工具返回读数。';
-    for(const [id,valid] of [['check-sensor',data.checklist.sensor],['check-comfort',activeSettings.comfortIsPersonalized],['check-query',data.checklist.temperatureToolUsed]])$(id).classList.toggle('done',valid);
-    $('ready-state').textContent=data.checklist.sensor&&activeSettings.comfortIsPersonalized&&data.checklist.temperatureToolUsed?'已完成连接与查询检查':'继续完成首次设置';
+    for(const [id,valid] of [['check-sensor',data.checklist.sensor],['check-comfort',data.checklist.comfort],['check-query',data.checklist.temperatureToolUsed]])$(id).classList.toggle('done',valid);
+    $('ready-state').textContent=data.checklist.sensor&&data.checklist.comfort&&chatConfigured&&data.checklist.temperatureToolUsed?'已完成配置与工具检查，请核对实际回复':'继续完成首次设置';
     $('serial-pause').textContent=data.serial.paused?'恢复采集':'暂停采集';
   }catch(error){$('connection-help').textContent='连接诊断暂时不可用，请确认温度服务正在运行。';}
   finally{diagnosticsBusy=false;}
@@ -237,6 +287,9 @@ void refreshDiagnostics();
 setInterval(()=>{if(!document.hidden)void refreshDiagnostics();},2500);
 
 await Promise.all([poll(), loadSettings()]);
+await refreshChatStatus();
+if(!activeSettings.chatSetupDismissed&&!chatConfigured&&!wizardOffered){wizardOffered=true;openChatWizard();}
+setInterval(()=>{if(!document.hidden)void refreshChatStatus();},10000);
 setInterval(poll, 1000);
 setInterval(async () => {
   if (saving || document.hidden) return;

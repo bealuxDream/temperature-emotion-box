@@ -51,7 +51,8 @@ function isLocalOrigin(req) {
 
 export function createServer({ token, deviceId = 'box-01', staleAfterMs = 10000, now,
   settingsStore = null, getChatUrl = () => 'http://127.0.0.1:3080/', onSettingsUpdated = async () => {},
-  listPorts = () => SerialPort.list(), getDiagnostics = async () => null, onSerialControl = async () => {} } = {}) {
+  listPorts = () => SerialPort.list(), getDiagnostics = async () => null, onSerialControl = async () => {},
+  getChatStatus = async () => ({status:'unknown',modelCount:0}) } = {}) {
   const store = new TemperatureStore({ deviceId, staleAfterMs, now });
   const expected = token && token.length >= 32 ? Buffer.from(`Bearer ${token}`) : null;
   const server = http.createServer(async (req, res) => {
@@ -72,6 +73,13 @@ export function createServer({ token, deviceId = 'box-01', staleAfterMs = 10000,
         return res.end();
       }
       if (req.method === 'GET' && path === '/favicon.ico') { res.writeHead(204); return res.end(); }
+      if (req.method === 'GET' && path === '/api/v1/chat-status') {
+        if (!isLocalOrigin(req)) return json(403, { error:'Chat configuration is local only' });
+        const status=await getChatStatus();
+        return json(200, {status:['configured','unconfigured'].includes(status.status)?status.status:'unknown',
+          modelCount:Number.isSafeInteger(status.modelCount)&&status.modelCount>=0?status.modelCount:0,
+          replyVerified:false});
+      }
       if (req.method === 'POST' && path === '/api/v1/readings') {
         if (!expected) return json(503, { error: 'HTTP device ingress is not configured' });
         const provided = Buffer.from(req.headers.authorization ?? '');
@@ -114,7 +122,7 @@ export function createServer({ token, deviceId = 'box-01', staleAfterMs = 10000,
           path: portPath, manufacturer: manufacturer ?? '', vendor_id: vendorId ?? '', product_id: productId ?? '',
         })) });
       }
-      if (req.method === 'GET' && path === '/health') return json(200, { ok: true, service: 'temperature-emotion-box', version: '0.4.0', sensor_status: store.snapshot().status });
+      if (req.method === 'GET' && path === '/health') return json(200, { ok: true, service: 'temperature-emotion-box', version: '0.4.2', sensor_status: store.snapshot().status });
       if (req.method === 'GET' && pageFiles.has(path)) {
         const [file, type] = pageFiles.get(path);
         res.writeHead(200, { 'Content-Type': `${type}; charset=utf-8`, 'Cache-Control': 'no-cache',
@@ -179,7 +187,7 @@ export async function createTemperatureRuntime(config = {}, { spawnProcess = spa
   const transport = { paused:false, connected:false, selectedPort:'', error:'', validFrames:0, ignoredLines:0, lastFrameAt:null };
   const diagnostics = async () => describeDiagnostics({ reading:store.snapshot(), settings:settingsStore.read(), ports:await listPorts(), transport:{...transport}, lastToolQueryAt });
   const { server, store } = createServer({ token: config.deviceToken, deviceId, staleAfterMs,
-    settingsStore, listPorts, getChatUrl: config.getChatUrl,
+    settingsStore, listPorts, getChatUrl: config.getChatUrl, getChatStatus: config.getChatStatus,
     getDiagnostics:diagnostics, onSerialControl:(action) => controlSerial(action),
     onSettingsUpdated: (settings) => connectSerial(settings.serialPort) });
 

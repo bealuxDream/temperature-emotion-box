@@ -19,3 +19,5 @@ ESP32-S3 通过 USB 串口、115200 baud 向主机逐行写入 JSON 帧，COM �
 `POST /api/v1/serial-control` 接受 JSON `{"action":"pause"}` 或 `{"action":"resume"}`。暂停等待串口关闭并立即使当前温度失效；恢复重新打开所选端口，等待新帧。这些接口与设置接口仅接受本机、相同来源请求。浏览器刷写页使用它释放采集端口。面板默认 8787 被占用时换用空闲端口，实际 URL 以启动日志或 Windows 启动器为准。
 
 dsh 插件通过 `ctx.systemPrompt.section(...)` 在每次组装系统提示词时读取有效温度和当前偏好。温度始终用于调节回复话量、积极程度与情绪；每个 dsh 轮次按 17% 概率抽取一次，同轮内模型步骤复用该结果，允许时最多顺带一句自然的温度体感。用户直接询问当前温度或冷暖时不受此概率限制，必须查询并如实回答。通过 `get_current_temperature` 工具即时查询，通过 `remember_comfort_temperature` 工具持久化用户确认的舒适温度。停用完整插件包会清理工具、提示词、面板监听和串口连接。
+
+`GET /api/v1/chat-status` 仅允许本机同来源请求。通过官方 `ctx.llm.listProviders()` / `listModels()` 返回 `status=unconfigured|configured|unknown`、可选模型数量，以及始终为 false 的 `replyVerified`。检查最长等待 2.5 秒，失败不回显底层错误、模型详情或凭证。`configured` 仅表示目录有可选模型，不代表实际请求成功。首次聊天向导保存 `chatSetupDismissed` 以避免重复弹出，用户可随时重开；跳过不会把模型或工具检查项标为完成。

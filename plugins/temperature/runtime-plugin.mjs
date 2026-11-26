@@ -1,9 +1,10 @@
 import Schema from '@deepseek-ai/schemastery';
 import { createTemperatureRuntime } from './runtime.mjs';
+import { checkChatModels } from './chat-setup.mjs';
 
 export const name = 'dsh-temperature-emotion-box/runtime';
 export const provide = 'temperatureBoxRuntime';
-export const inject = ['webApp', 'connection'];
+export const inject = ['webApp', 'connection', 'llm'];
 export const Config = Schema.object({
   host: Schema.string().default('127.0.0.1'),
   port: Schema.number().min(0).max(65535).default(8787),
@@ -29,6 +30,7 @@ export async function apply(ctx, config) {
   }
   const runtime = await createTemperatureRuntime({ ...config,
     getChatUrl: () => ctx.connection.authenticatedUrl(ctx.webApp.getAdvertisedUrl()),
+    getChatStatus: () => checkChatModels(ctx.llm),
   });
   ctx.effect(() => () => runtime.close(), 'temperature-emotion-box.runtime');
   ctx.provide('temperatureBoxRuntime', runtime);

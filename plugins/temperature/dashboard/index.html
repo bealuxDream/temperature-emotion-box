@@ -9,7 +9,7 @@
   <section class="intro"><h1>感知此刻的温度，<br>多一点<span>恰好的关心。</span></h1><p>让房间的冷暖，成为对话的一部分。</p></section>
   <section class="card onboarding" aria-labelledby="onboarding-title">
     <div class="settings-heading"><div><h2 id="onboarding-title">四步开始，让关心接上真实温度</h2><p>按顺序完成；绿色状态只代表实际检查通过的步骤。</p></div><span id="ready-state" class="settings-state">正在检查</span></div>
-    <ol class="setup-checklist"><li id="check-sensor"><strong>1 · 连接开发板</strong><span id="sensor-step">插入数据 USB 线，选择设备。</span></li><li id="check-comfort"><strong>2 · 设置舒适区</strong><span id="comfort-step">由你填写理想温度或范围，也可以稍后设置。</span></li><li><strong>3 · 配置聊天</strong><span>打开 DeepSeek 聊天，按官方中文引导填写 API Key；已经配置过可跳过。</span></li><li id="check-query"><strong>4 · 试着问一次</strong><span id="query-step">在聊天中问“现在真实温度是多少？”，确认工具返回读数。</span></li></ol>
+    <ol class="setup-checklist"><li id="check-sensor"><strong>1 · 连接开发板</strong><span id="sensor-step">插入数据 USB 线，选择设备。</span></li><li id="check-comfort"><strong>2 · 设置舒适区</strong><span id="comfort-step">由你填写理想温度或范围，也可以稍后设置。</span></li><li id="check-chat"><strong>3 · 配置聊天</strong><span id="chat-step">打开配置向导，填写自己的 API Key。</span><button type="button" id="open-chat-setup" class="skip-button">打开聊天配置向导</button></li><li id="check-query"><strong>4 · 试着问一次</strong><span id="query-step">在聊天中问“现在真实温度是多少？”，确认工具返回读数。</span></li></ol>
     <div class="setup-connection"><label class="field">开发板串口<select id="setup-serial"><option value="auto">自动识别 USB 设备</option><option value="">仅使用 HTTP 上报</option></select></label><button type="button" id="refresh-ports" class="save-button">重新检查</button><button type="button" id="serial-pause" class="skip-button">暂停采集</button></div>
     <p id="connection-help" role="status" aria-live="polite">正在读取连接诊断…</p><p id="connection-action" class="field-help"></p>
     <div class="setup-links"><a href="/flash/" target="_blank" rel="noreferrer">首次使用？刷写配套固件 ↗</a><a href="/chat" target="_blank" rel="noreferrer">打开 DeepSeek 聊天 ↗</a><a href="#comfort-setup-title">填写舒适温度 ↓</a></div>
@@ -68,4 +68,14 @@
   </section>
   <footer><span>温度有数，关心有度。</span><span>探头温度 ≠ 体温 · 过期数据不会作为实时温度使用 · 轻松安装的 DeepSeek Harness 插件</span></footer>
 </main><script type="module" src="/app.js"></script>
+<dialog id="chat-setup-dialog" aria-labelledby="chat-setup-title">
+  <div class="wizard-heading"><div><span class="eyebrow">LET'S SAY HELLO</span><h2 id="chat-setup-title">让欧鲸鲸开始和你聊天</h2></div><button type="button" id="chat-setup-close" class="skip-button" aria-label="关闭聊天配置向导">关闭</button></div>
+  <p>只需配置一次。密钥直接保存在本机 dsh 中，温度面板不会读取或保存密钥。</p>
+  <nav class="wizard-steps" aria-label="聊天配置步骤"><button type="button" data-wizard-step="0">1 · 准备密钥</button><button type="button" data-wizard-step="1">2 · 配置聊天</button><button type="button" data-wizard-step="2">3 · 检查并试聊</button></nav>
+  <section data-wizard-panel="0"><h3>准备你自己的 DeepSeek API Key</h3><p>在 DeepSeek 开放平台创建 API 密钥，模型服务可能按使用量计费。已有密钥可以直接下一步。</p><a class="chat-link" href="https://platform.deepseek.com/api_keys" target="_blank" rel="noreferrer">打开 DeepSeek 密钥管理 ↗</a><p class="field-help">不要把密钥发进聊天或截图，也不用把它填在这个向导里。</p></section>
+  <section data-wizard-panel="1" hidden><h3>在 dsh 原生设置中填写密钥</h3><a class="chat-link" href="/chat" target="_blank" rel="noreferrer">打开 DeepSeek 聊天进行配置 ↗</a><ol class="wizard-instructions"><li>展开聊天页的左侧边栏。</li><li>点击左下角账号菜单，选择「设置」。</li><li>点击「模型」，在 DeepSeek 的「API 密钥」框粘贴密钥并保存。</li><li>关闭设置，选择模型和「默认工作区」，再回到这里检查。</li></ol><p class="field-help">不需要先登录 dsh 账号。看到「暂无可用模型」时，请按上面的路径检查密钥是否保存。密钥无效、余额或网络问题仍可能导致请求失败。</p></section>
+  <section data-wizard-panel="2" hidden><h3>确认模型，再问一次真实温度</h3><p id="chat-setup-status" role="status" aria-live="polite">正在读取模型配置…</p><button type="button" id="check-chat-status" class="save-button">我已保存，重新检查</button><p>在聊天页选择模型后，发送：<strong>现在真实温度是多少？请使用温度查询工具。</strong></p><p>收到工具结果和 AI 回复后，核对是否与面板一致。没有设备时，应如实说明无法获取温度。</p><a class="chat-link" href="/chat" target="_blank" rel="noreferrer">进入聊天试问温度 ↗</a><p class="field-help">检测到可选模型只代表配置已加载，不代表密钥、余额、网络或 AI 回复已验证成功。</p></section>
+  <div class="wizard-actions"><button type="button" id="chat-setup-later" class="skip-button">稍后配置</button><div><button type="button" id="chat-setup-back" class="skip-button">上一步</button><button type="button" id="chat-setup-next" class="save-button">下一步</button></div></div>
+  <p id="chat-setup-message" role="status" aria-live="polite"></p>
+</dialog>
 </body></html>

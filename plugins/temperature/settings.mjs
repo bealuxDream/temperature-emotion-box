@@ -17,6 +17,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
   autoOpenDashboardOnFirstRun: true,
   dashboardOpened: false,
   comfortSetupDismissed: false,
+  chatSetupDismissed: false,
 });
 
 export const AMBIENT_TEMPERATURE_MENTION_PROBABILITY = 0.17;
@@ -70,6 +71,7 @@ export function normalizeSettings(input, base = DEFAULT_SETTINGS) {
     throw new TypeError('自动打开面板必须选择开或关。');
   }
   if (typeof next.comfortSetupDismissed !== 'boolean') throw new TypeError('首次配置状态无效。');
+  if (typeof next.chatSetupDismissed !== 'boolean') throw new TypeError('聊天向导状态无效。');
   return next;
 }
 
